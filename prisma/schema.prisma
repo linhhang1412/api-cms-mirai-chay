@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Vai trò của người dùng trong hệ thống
+enum Role {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+/// Trạng thái tài khoản
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+/// Người dùng hệ thống CMS (quản lý nguyên liệu cửa hàng đồ ăn chay)
+model User {
+  /// Khóa chính nội bộ (int autoincrement)
+  id            Int        @id @default(autoincrement())
+  /// Định danh public (UUID) – service sẽ generate
+  publicId      String     @unique @db.Uuid
+  /// Email dùng để đăng nhập và nhận mã OTP (duy nhất)
+  email         String     @unique(map: "uniq_user_email") @db.VarChar(100)
+  /// Họ và tên người dùng
+  fullName      String?    @db.VarChar(100)
+  /// Số điện thoại (tùy chọn)
+  phone         String?    @db.VarChar(20)
+  /// Vai trò người dùng (mặc định: STAFF)
+  role          Role       @default(STAFF)
+  /// Ảnh đại diện (URL)
+  avatar        String?    @db.VarChar(255)
+  /// Trạng thái tài khoản (mặc định: ACTIVE)
+  status        Status     @default(ACTIVE)
+  /// Thời gian đăng nhập thành công lần cuối
+  lastLoginAt   DateTime?
+  /// Thời gian gửi OTP lần cuối
+  lastOtpSentAt DateTime?
+  /// Thời gian thử đăng nhập thất bại lần cuối
+  failedLoginAt DateTime?
+  /// Thời gian tạo bản ghi
+  createdAt     DateTime
+  /// Thời gian cập nhật bản ghi
+  updatedAt     DateTime
+  emailOtps     EmailOtp[]
+
+  @@index([status], map: "idx_user_status")
+  @@index([role], map: "idx_user_role")
+  @@index([status, role], map: "idx_user_status_role")
+  @@index([email, status], map: "idx_user_email_status")
+  @@index([lastLoginAt], map: "idx_user_last_login")
+  @@index([lastOtpSentAt], map: "idx_user_last_otp_sent")
+  @@map("users")
+}
+
+/// Mã OTP (một lần dùng) gửi qua email để đăng nhập không mật khẩu
+model EmailOtp {
+  /// Khóa chính nội bộ
+  id        Int      @id @default(autoincrement())
+  /// Email nhận mã OTP
+  email     String   @db.VarChar(100)
+  /// Mã OTP 6 chữ số
+  code      String   @db.VarChar(6)
+  /// Thời hạn hiệu lực
+  expiresAt DateTime
+  /// Số lần nhập sai mã
+  attempts  Int      @default(0)
+  /// Mã đã được dùng để đăng nhập chưa?
+  used      Boolean  @default(false)
+  /// Thời gian tạo bản ghi
+  createdAt DateTime
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([email, code, used], name: "uniq_active_otp")
+  @@index([email], map: "idx_otp_email")
+  @@index([expiresAt], map: "idx_otp_expires")
+  @@index([createdAt], map: "idx_otp_created")
+  @@index([email, expiresAt, used], map: "idx_otp_active")
+  @@map("email_otps")
+}
