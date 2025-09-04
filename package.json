@@ -28,9 +28,11 @@
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.15.0",
     "class-validator": "^0.14.2",
+    "handlebars": "^4.7.8",
     "passport-jwt": "^4.0.1",
     "prisma": "^6.15.0",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.0.2",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {

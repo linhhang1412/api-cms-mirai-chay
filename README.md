@@ -25,6 +25,25 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## About this project
+
+This is a CMS API for Mirai Chay - a vegetarian restaurant chain management system. 
+The API provides user management and authentication features using passwordless login via email OTP.
+
+## Environment Variables
+
+Create a `.env` file based on `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Then configure the following variables:
+
+- `DATABASE_URL`: PostgreSQL connection string
+- `JWT_SECRET`: Secret key for JWT token signing
+- `RESEND_API_KEY`: API key for Resend email service
+
 ## Project setup
 
 ```bash

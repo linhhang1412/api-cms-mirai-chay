@@ -1,19 +1,31 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { EmailOtpRepository } from './email-otp.repository';
 import { EmailOtpEntity } from './entity/email-otp.entity';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class EmailOtpService {
-    constructor(private readonly otpRepo: EmailOtpRepository) { }
+    constructor(
+        private readonly otpRepo: EmailOtpRepository,
+        private readonly notificationService: NotificationService,
+    ) { }
 
     async generateOtp(email: string, userId?: number): Promise<EmailOtpEntity> {
         const code = this.generateCode();
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 phút
 
-        // TODO: gửi code qua email (EmailService)
-        console.log(`OTP for ${email}: ${code}`);
+        // Tạo OTP trong database
+        const otp = await this.otpRepo.create(email, code, expiresAt, userId);
 
-        return this.otpRepo.create(email, code, expiresAt, userId);
+        // Gửi OTP qua email
+        try {
+            await this.notificationService.sendOtpEmail(email, code, expiresAt);
+        } catch (error) {
+            // Log error nhưng không throw để không làm gián đoạn quy trình
+            console.error('Failed to send OTP email:', error);
+        }
+
+        return otp;
     }
 
     async verifyOtp(email: string, code: string): Promise<EmailOtpEntity> {
