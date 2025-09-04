@@ -57,21 +57,5 @@ export class AuthController {
         return { message: 'Đăng xuất thành công' };
     }
 
-    // Endpoint đặc biệt cho development/testing - không dùng trong production
-    @Get('test-login')
-    @ApiOperation({ summary: 'Endpoint test login cho môi trường phát triển' })
-    @ApiResponse({ status: 200, description: 'Thông tin endpoint test login' })
-    async testLogin() {
-        // Trong môi trường development, trả về token test
-        if (process.env.NODE_ENV !== 'production') {
-            // Tạo một user test nếu chưa tồn tại
-            return { 
-                message: 'Endpoint test login cho môi trường phát triển', 
-                testEmail: 'test@example.com',
-                note: 'Sử dụng endpoint này để nhận token test cho Swagger UI'
-            };
-        }
-        
-        return { message: 'Không khả dụng trong môi trường production' };
-    }
+    
 }
