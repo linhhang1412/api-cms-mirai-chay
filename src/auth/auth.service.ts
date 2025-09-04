@@ -61,4 +61,33 @@ export class AuthService {
             throw new UnauthorizedException('Invalid refresh token');
         }
     }
+
+    // Phương thức đặc biệt cho development/testing
+    async createTestToken(email: string = 'test@example.com') {
+        if (process.env.NODE_ENV === 'production') {
+            throw new UnauthorizedException('Test token not available in production');
+        }
+
+        // Tạo hoặc tìm user test
+        let user = await this.userRepo.findByEmail(email);
+        if (!user) {
+            user = await this.userRepo.create({ 
+                email,
+                fullName: 'Test User',
+                role: 'ADMIN' // Cho phép full access trong test
+            });
+        }
+
+        // Tạo token test
+        const payload = { sub: user.publicId, email: user.email, role: user.role };
+        const accessToken = await this.jwtService.signAsync(payload);
+        const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+
+        return { 
+            accessToken, 
+            refreshToken,
+            user,
+            message: 'Test token created successfully'
+        };
+    }
 }
