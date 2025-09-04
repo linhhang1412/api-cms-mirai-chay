@@ -34,8 +34,31 @@ export class AuthService {
         }
 
         const payload = { sub: user.publicId, email: user.email, role: user.role };
-        const token = await this.jwtService.signAsync(payload);
+        const accessToken = await this.jwtService.signAsync(payload);
+        const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
 
-        return { accessToken: token, user };
+        return { 
+            accessToken, 
+            refreshToken,
+            user 
+        };
+    }
+
+    async refreshAccessToken(refreshToken: string) {
+        try {
+            const payload = await this.jwtService.verifyAsync(refreshToken);
+            const user = await this.userRepo.findByEmail(payload.email);
+            
+            if (!user) {
+                throw new UnauthorizedException('User not found');
+            }
+
+            const newPayload = { sub: user.publicId, email: user.email, role: user.role };
+            const newAccessToken = await this.jwtService.signAsync(newPayload);
+            
+            return { accessToken: newAccessToken };
+        } catch {
+            throw new UnauthorizedException('Invalid refresh token');
+        }
     }
 }
