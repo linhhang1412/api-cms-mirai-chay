@@ -4,9 +4,9 @@ import { EmailOtpService } from './email-otp.service';
 import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-    imports: [NotificationModule],
-    controllers: [],
-    providers: [EmailOtpService, EmailOtpRepository],
-    exports: [EmailOtpService],
+  imports: [NotificationModule],
+  controllers: [],
+  providers: [EmailOtpService, EmailOtpRepository],
+  exports: [EmailOtpService],
 })
-export class EmailOtpModule { }
+export class EmailOtpModule {}

@@ -9,17 +9,17 @@ import { NotificationModule } from '../notification/notification.module';
 import { RolesGuard } from './roles.guard';
 
 @Module({
-    imports: [
-        UserModule,
-        EmailOtpModule,
-        NotificationModule,
-        JwtModule.register({
-            secret: process.env.JWT_SECRET || 'changeme',
-            signOptions: { expiresIn: '1h' },
-        }),
-    ],
-    providers: [AuthService, JwtStrategy, RolesGuard],
-    controllers: [AuthController],
-    exports: [RolesGuard],
+  imports: [
+    UserModule,
+    EmailOtpModule,
+    NotificationModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'changeme',
+      signOptions: { expiresIn: '1h' },
+    }),
+  ],
+  providers: [AuthService, JwtStrategy, RolesGuard],
+  controllers: [AuthController],
+  exports: [RolesGuard],
 })
-export class AuthModule { }
+export class AuthModule {}

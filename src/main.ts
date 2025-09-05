@@ -8,11 +8,13 @@ async function bootstrap() {
   // Cấu hình Swagger
   const config = new DocumentBuilder()
     .setTitle('Mirai Chay CMS API')
-    .setDescription('Tài liệu API cho hệ thống quản lý CMS của chuỗi nhà hàng đồ ăn chay Mirai Chay')
+    .setDescription(
+      'Tài liệu API cho hệ thống quản lý CMS của chuỗi nhà hàng đồ ăn chay Mirai Chay',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();
-    
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 

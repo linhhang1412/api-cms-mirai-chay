@@ -1,13 +1,13 @@
-import { 
-  Body, 
-  Controller, 
-  Get, 
-  Param, 
-  Post, 
-  Put, 
-  Delete, 
-  Query, 
-  UseGuards 
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Delete,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,27 +16,31 @@ import { UserEntity } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse, 
-  ApiBody, 
-  ApiParam, 
-  ApiQuery, 
-  ApiBearerAuth 
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 @ApiTags('Người dùng')
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   @Roles('ADMIN', 'MANAGER')
   @ApiOperation({ summary: 'Tạo người dùng mới' })
   @ApiBearerAuth()
-  @ApiResponse({ status: 201, description: 'Tạo người dùng thành công', type: UserEntity })
+  @ApiResponse({
+    status: 201,
+    description: 'Tạo người dùng thành công',
+    type: UserEntity,
+  })
   @ApiResponse({ status: 400, description: 'Dữ liệu đầu vào không hợp lệ' })
   @ApiResponse({ status: 401, description: 'Chưa xác thực' })
   @ApiResponse({ status: 403, description: 'Không có quyền truy cập' })
@@ -49,7 +53,11 @@ export class UserController {
   @Roles('ADMIN', 'MANAGER')
   @ApiOperation({ summary: 'Lấy danh sách tất cả người dùng' })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, description: 'Lấy danh sách người dùng thành công', type: [UserEntity] })
+  @ApiResponse({
+    status: 200,
+    description: 'Lấy danh sách người dùng thành công',
+    type: [UserEntity],
+  })
   @ApiResponse({ status: 401, description: 'Chưa xác thực' })
   @ApiResponse({ status: 403, description: 'Không có quyền truy cập' })
   findAll() {
@@ -61,7 +69,11 @@ export class UserController {
   @ApiOperation({ summary: 'Lấy thông tin người dùng theo ID' })
   @ApiBearerAuth()
   @ApiParam({ name: 'id', description: 'ID của người dùng', type: Number })
-  @ApiResponse({ status: 200, description: 'Lấy thông tin người dùng thành công', type: UserEntity })
+  @ApiResponse({
+    status: 200,
+    description: 'Lấy thông tin người dùng thành công',
+    type: UserEntity,
+  })
   @ApiResponse({ status: 401, description: 'Chưa xác thực' })
   @ApiResponse({ status: 403, description: 'Không có quyền truy cập' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy người dùng' })
@@ -75,8 +87,16 @@ export class UserController {
   @Roles('ADMIN', 'MANAGER')
   @ApiOperation({ summary: 'Lấy thông tin người dùng theo email' })
   @ApiBearerAuth()
-  @ApiParam({ name: 'email', description: 'Email của người dùng', type: String })
-  @ApiResponse({ status: 200, description: 'Lấy thông tin người dùng thành công', type: UserEntity })
+  @ApiParam({
+    name: 'email',
+    description: 'Email của người dùng',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lấy thông tin người dùng thành công',
+    type: UserEntity,
+  })
   @ApiResponse({ status: 401, description: 'Chưa xác thực' })
   @ApiResponse({ status: 403, description: 'Không có quyền truy cập' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy người dùng' })
@@ -91,7 +111,11 @@ export class UserController {
   @ApiBearerAuth()
   @ApiParam({ name: 'id', description: 'ID của người dùng', type: Number })
   @ApiBody({ type: UpdateUserDto })
-  @ApiResponse({ status: 200, description: 'Cập nhật thông tin người dùng thành công', type: UserEntity })
+  @ApiResponse({
+    status: 200,
+    description: 'Cập nhật thông tin người dùng thành công',
+    type: UserEntity,
+  })
   @ApiResponse({ status: 400, description: 'Dữ liệu đầu vào không hợp lệ' })
   @ApiResponse({ status: 401, description: 'Chưa xác thực' })
   @ApiResponse({ status: 403, description: 'Không có quyền truy cập' })
@@ -107,15 +131,17 @@ export class UserController {
   @ApiOperation({ summary: 'Xóa người dùng theo ID' })
   @ApiBearerAuth()
   @ApiParam({ name: 'id', description: 'ID của người dùng', type: Number })
-  @ApiQuery({ name: 'hard', description: 'Thực hiện xóa vĩnh viễn', required: false, type: Boolean })
+  @ApiQuery({
+    name: 'hard',
+    description: 'Thực hiện xóa vĩnh viễn',
+    required: false,
+    type: Boolean,
+  })
   @ApiResponse({ status: 200, description: 'Xóa người dùng thành công' })
   @ApiResponse({ status: 401, description: 'Chưa xác thực' })
   @ApiResponse({ status: 403, description: 'Không có quyền truy cập' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy người dùng' })
-  async delete(
-    @Param('id') id: string, 
-    @Query('hard') hardDelete: string
-  ) {
+  async delete(@Param('id') id: string, @Query('hard') hardDelete: string) {
     const userId = parseInt(id, 10);
     const hard = hardDelete === 'true';
     return this.userService.delete(userId, hard);

@@ -8,4 +8,4 @@ import { UserRepository } from './user.repository';
   providers: [UserService, UserRepository],
   exports: [UserRepository], // Export UserRepository để các module khác có thể sử dụng
 })
-export class UserModule { }
+export class UserModule {}

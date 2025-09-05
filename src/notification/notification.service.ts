@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { Resend } from 'resend';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -8,14 +12,15 @@ import * as Handlebars from 'handlebars';
 export class NotificationService {
   private readonly resend: Resend;
   private readonly templatesPath: string;
-  private readonly compiledTemplates: Map<string, Handlebars.TemplateDelegate> = new Map();
+  private readonly compiledTemplates: Map<string, Handlebars.TemplateDelegate> =
+    new Map();
   private readonly logger = new Logger(NotificationService.name);
 
   constructor() {
     this.resend = new Resend(process.env.RESEND_API_KEY);
     // Sử dụng đường dẫn tương đối đến thư mục templates
     this.templatesPath = path.join(__dirname, 'templates');
-    
+
     // Register helper to format date
     Handlebars.registerHelper('formatDate', (date) => {
       return new Date(date).toLocaleString('vi-VN', {
@@ -24,7 +29,7 @@ export class NotificationService {
         minute: '2-digit',
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric'
+        year: 'numeric',
       });
     });
   }
@@ -38,13 +43,15 @@ export class NotificationService {
         title: 'Xác thực đăng nhập - Mirai Chay',
         headerTitle: 'Xác thực đăng nhập',
         code,
-        expiryTime: expiresAt
+        expiryTime: expiresAt,
       });
 
       this.logger.log(`Template email OTP đã được tạo cho ${to}`);
 
       // Log email content for debugging (remove in production)
-      this.logger.debug(`Nội dung email OTP cho ${to}: ${html.substring(0, 100)}...`);
+      this.logger.debug(
+        `Nội dung email OTP cho ${to}: ${html.substring(0, 100)}...`,
+      );
 
       // Send email via Resend
       this.logger.log(`Đang gửi email OTP đến ${to} với mã ${code}`);
@@ -56,31 +63,38 @@ export class NotificationService {
         html,
       });
 
-      this.logger.log(`Email OTP đã được gửi thành công đến ${to}. Response: ${JSON.stringify(response)}`);
+      this.logger.log(
+        `Email OTP đã được gửi thành công đến ${to}. Response: ${JSON.stringify(response)}`,
+      );
     } catch (error) {
       this.logger.error(`Failed to send OTP email to ${to}:`, error);
       throw new InternalServerErrorException('Failed to send OTP email');
     }
   }
 
-  private async renderTemplate(templateName: string, context: Record<string, any>): Promise<string> {
+  private async renderTemplate(
+    templateName: string,
+    context: Record<string, any>,
+  ): Promise<string> {
     // Get base template
     const baseTemplate = await this.getCompiledTemplate('base');
-    
+
     // Get specific template
     const specificTemplate = await this.getCompiledTemplate(templateName);
-    
+
     // Render specific content
     const specificContent = specificTemplate(context);
-    
+
     // Render with base template
     return baseTemplate({
       ...context,
-      body: specificContent
+      body: specificContent,
     });
   }
 
-  private async getCompiledTemplate(templateName: string): Promise<Handlebars.TemplateDelegate> {
+  private async getCompiledTemplate(
+    templateName: string,
+  ): Promise<Handlebars.TemplateDelegate> {
     // Check if already compiled
     if (this.compiledTemplates.has(templateName)) {
       return this.compiledTemplates.get(templateName)!;
@@ -91,11 +105,11 @@ export class NotificationService {
     this.logger.log(`Đang đọc template từ: ${templatePath}`);
 
     const templateContent = await fs.promises.readFile(templatePath, 'utf8');
-    
+
     // Compile and cache
     const compiled = Handlebars.compile(templateContent);
     this.compiledTemplates.set(templateName, compiled);
-    
+
     this.logger.log(`Template ${templateName} đã được biên dịch thành công`);
     return compiled;
   }
