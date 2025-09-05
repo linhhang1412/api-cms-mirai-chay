@@ -6,6 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { EmailOtpService } from '../email-otp/email-otp.service';
 import { UserRepository } from '../user/user.repository';
+import { AuthErrorMessages, AuthSuccessMessages } from './auth.messages';
 
 @Injectable()
 export class AuthService {
@@ -19,22 +20,22 @@ export class AuthService {
     // Kiểm tra user, nếu chưa có thì báo lỗi
     const user = await this.userRepo.findByEmail(email);
     if (!user) {
-      throw new BadRequestException('Email chưa được đăng ký trong hệ thống');
+      throw new BadRequestException(AuthErrorMessages.EMAIL_NOT_REGISTERED);
     }
 
     const otp = await this.otpService.generateOtp(email, user.id);
-    return { message: 'Mã OTP đã được gửi đến email', expiresAt: otp.expiresAt };
+    return { message: AuthSuccessMessages.OTP_SENT, expiresAt: otp.expiresAt };
   }
 
   async verifyOtp(email: string, code: string) {
     const otp = await this.otpService.verifyOtp(email, code);
     if (!otp) {
-      throw new UnauthorizedException('Mã OTP không hợp lệ hoặc đã hết hạn');
+      throw new UnauthorizedException(AuthErrorMessages.OTP_INVALID_OR_EXPIRED);
     }
 
     const user = await this.userRepo.findByEmail(email);
     if (!user) {
-      throw new UnauthorizedException('Không tìm thấy người dùng');
+      throw new UnauthorizedException(AuthErrorMessages.USER_NOT_FOUND);
     }
 
     const payload = { sub: user.publicId, email: user.email, role: user.role };
@@ -55,13 +56,13 @@ export class AuthService {
       const payload = await this.jwtService.verifyAsync(refreshToken);
       // Kiểm tra payload có chứa email không
       if (!payload || !payload.email) {
-        throw new UnauthorizedException('Token làm mới không hợp lệ');
+        throw new UnauthorizedException(AuthErrorMessages.INVALID_REFRESH_TOKEN);
       }
 
       const user = await this.userRepo.findByEmail(payload.email);
 
       if (!user) {
-        throw new UnauthorizedException('Không tìm thấy người dùng');
+        throw new UnauthorizedException(AuthErrorMessages.USER_NOT_FOUND);
       }
 
       const newPayload = {
@@ -73,7 +74,7 @@ export class AuthService {
 
       return { accessToken: newAccessToken };
     } catch {
-      throw new UnauthorizedException('Token làm mới không hợp lệ');
+      throw new UnauthorizedException(AuthErrorMessages.INVALID_REFRESH_TOKEN);
     }
   }
 }
