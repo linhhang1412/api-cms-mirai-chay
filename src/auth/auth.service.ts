@@ -23,18 +23,18 @@ export class AuthService {
     }
 
     const otp = await this.otpService.generateOtp(email, user.id);
-    return { message: 'OTP sent to email', expiresAt: otp.expiresAt };
+    return { message: 'Mã OTP đã được gửi đến email', expiresAt: otp.expiresAt };
   }
 
   async verifyOtp(email: string, code: string) {
     const otp = await this.otpService.verifyOtp(email, code);
     if (!otp) {
-      throw new UnauthorizedException('OTP invalid or expired');
+      throw new UnauthorizedException('Mã OTP không hợp lệ hoặc đã hết hạn');
     }
 
     const user = await this.userRepo.findByEmail(email);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('Không tìm thấy người dùng');
     }
 
     const payload = { sub: user.publicId, email: user.email, role: user.role };
@@ -55,13 +55,13 @@ export class AuthService {
       const payload = await this.jwtService.verifyAsync(refreshToken);
       // Kiểm tra payload có chứa email không
       if (!payload || !payload.email) {
-        throw new UnauthorizedException('Invalid refresh token');
+        throw new UnauthorizedException('Token làm mới không hợp lệ');
       }
 
       const user = await this.userRepo.findByEmail(payload.email);
 
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException('Không tìm thấy người dùng');
       }
 
       const newPayload = {
@@ -73,7 +73,7 @@ export class AuthService {
 
       return { accessToken: newAccessToken };
     } catch {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException('Token làm mới không hợp lệ');
     }
   }
 }
