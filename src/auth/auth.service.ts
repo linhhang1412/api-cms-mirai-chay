@@ -6,7 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { EmailOtpService } from '../email-otp/email-otp.service';
 import { UserRepository } from '../user/user.repository';
-import { AuthErrorMessages, AuthSuccessMessages } from './auth.messages';
+import { AuthErrorMessages, AuthSuccessMessages, AuthJwtConfig } from './auth.messages';
 
 @Injectable()
 export class AuthService {
@@ -39,9 +39,11 @@ export class AuthService {
     }
 
     const payload = { sub: user.publicId, email: user.email, role: user.role };
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: AuthJwtConfig.ACCESS_TOKEN_EXPIRES_IN,
+    });
     const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d',
+      expiresIn: AuthJwtConfig.REFRESH_TOKEN_EXPIRES_IN,
     });
 
     return {
@@ -70,7 +72,9 @@ export class AuthService {
         email: user.email,
         role: user.role,
       };
-      const newAccessToken = await this.jwtService.signAsync(newPayload);
+      const newAccessToken = await this.jwtService.signAsync(newPayload, {
+        expiresIn: AuthJwtConfig.ACCESS_TOKEN_EXPIRES_IN,
+      });
 
       return { accessToken: newAccessToken };
     } catch {

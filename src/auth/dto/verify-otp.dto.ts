@@ -1,21 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, Length } from 'class-validator';
+import { AuthDtoDescriptions, AuthDtoExamples, AuthOtpConfig } from '../auth.messages';
 
 export class VerifyOtpDto {
-  @ApiProperty({
-    description: 'Địa chỉ email của người dùng',
-    example: 'nguoidung@example.com',
-  })
-  @IsEmail()
-  email: string;
+    @ApiProperty({ 
+        description: AuthDtoDescriptions.EMAIL,
+        example: AuthDtoExamples.EMAIL
+    })
+    @IsEmail()
+    email: string;
 
-  @ApiProperty({
-    description: 'Mã OTP 6 chữ số',
-    example: '123456',
-    minLength: 6,
-    maxLength: 6,
-  })
-  @IsString()
-  @Length(6, 6)
-  code: string;
+    @ApiProperty({ 
+        description: AuthDtoDescriptions.OTP_CODE,
+        example: AuthDtoExamples.OTP_CODE,
+        minLength: AuthOtpConfig.LENGTH,
+        maxLength: AuthOtpConfig.LENGTH
+    })
+    @IsString()
+    @Length(AuthOtpConfig.LENGTH, AuthOtpConfig.LENGTH)
+    code: string;
 }
