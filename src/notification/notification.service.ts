@@ -7,6 +7,7 @@ import { Resend } from 'resend';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
+import { NotificationConfig, NotificationMessages } from './constants';
 
 @Injectable()
 export class NotificationService {
@@ -18,9 +19,9 @@ export class NotificationService {
   private readonly dryRun: boolean;
 
   constructor() {
-    const apiKey = process.env.RESEND_API_KEY;
+    const apiKey = process.env[NotificationConfig.ENV.RESEND_API_KEY];
     if (!apiKey) {
-      this.logger.warn('RESEND_API_KEY is not set. Email sending is in dry-run mode.');
+      this.logger.warn(NotificationMessages.WARN.MISSING_API_KEY);
       this.resend = null;
       this.dryRun = true;
     } else {
@@ -45,48 +46,66 @@ export class NotificationService {
 
   async sendOtpEmail(to: string, code: string, expiresAt: Date): Promise<void> {
     try {
-      this.logger.log(`Bắt đầu tạo template email OTP cho ${to}`);
+      this.logger.log(
+        NotificationMessages.LOG.START_RENDER_OTP.replace('{{to}}', to),
+      );
 
       // Compile template with context
-      const html = await this.renderTemplate('otp', {
+      const html = await this.renderTemplate(NotificationConfig.TEMPLATES.OTP, {
         title: 'Xác thực đăng nhập - Mirai Chay',
         headerTitle: 'Xác thực đăng nhập',
         code,
         expiryTime: expiresAt,
       });
 
-      this.logger.log(`Template email OTP đã được tạo cho ${to}`);
+      this.logger.log(
+        NotificationMessages.LOG.TEMPLATE_RENDERED.replace('{{to}}', to),
+      );
 
       // Log content only in non-production and dry-run
       const isProd = process.env.NODE_ENV === 'production';
       if (!isProd) {
-        this.logger.debug(`OTP for ${to}: [REDACTED in logs]. Expires at: ${expiresAt.toISOString()}`);
+        this.logger.debug(
+          `Mã OTP cho ${to}: [ẨN TRONG LOG]. Hết hạn lúc: ${expiresAt.toISOString()}`,
+        );
       }
 
       // Send email via Resend or dry-run
       if (this.dryRun || !this.resend) {
-        this.logger.log(`Dry-run: pretend sending OTP email to ${to}`);
+        this.logger.log(
+          NotificationMessages.LOG.DRY_RUN_SEND.replace('{{to}}', to),
+        );
         return;
       }
 
-      this.logger.log(`Đang gửi email OTP đến ${to}`);
+      this.logger.log(
+        NotificationMessages.LOG.SENDING_EMAIL.replace('{{to}}', to),
+      );
       const response = await this.resend.emails.send({
-        from: 'Mirai Chay <no-reply@dev.miraichay.com>',
+        from: NotificationConfig.EMAIL.FROM,
         to,
-        subject: 'Mã xác thực đăng nhập Mirai Chay',
+        subject: NotificationConfig.EMAIL.SUBJECTS.OTP,
         html,
       });
 
       if (!isProd) {
         this.logger.log(
-          `Email OTP đã được gửi thành công đến ${to}. Response: ${JSON.stringify(
-            response,
-          )}`,
+          NotificationMessages.LOG.SENT_SUCCESS_DEV.replace('{{to}}', to).replace(
+            '{{response}}',
+            JSON.stringify(response),
+          ),
         );
       }
     } catch (error) {
-      this.logger.error(`Failed to send OTP email to ${to}: ${(error as Error).message}`);
-      throw new InternalServerErrorException('Failed to send OTP email');
+      this.logger.error(
+        NotificationMessages.ERROR.SEND_FAILED.replace('{{to}}', to).replace(
+          '{{message}}',
+          (error as Error).message,
+        ),
+      );
+      throw new InternalServerErrorException(
+        NotificationMessages.ERROR.SEND_FAILED_USER,
+      );
     }
   }
 
@@ -95,7 +114,9 @@ export class NotificationService {
     context: Record<string, any>,
   ): Promise<string> {
     // Get base template
-    const baseTemplate = await this.getCompiledTemplate('base');
+    const baseTemplate = await this.getCompiledTemplate(
+      NotificationConfig.TEMPLATES.BASE,
+    );
 
     // Get specific template
     const specificTemplate = await this.getCompiledTemplate(templateName);
@@ -120,7 +141,9 @@ export class NotificationService {
 
     // Read template file
     const templatePath = path.join(this.templatesPath, `${templateName}.hbs`);
-    this.logger.log(`Đang đọc template từ: ${templatePath}`);
+    this.logger.log(
+      NotificationMessages.LOG.READING_TEMPLATE.replace('{{path}}', templatePath),
+    );
 
     const templateContent = await fs.promises.readFile(templatePath, 'utf8');
 
@@ -128,7 +151,9 @@ export class NotificationService {
     const compiled = Handlebars.compile(templateContent);
     this.compiledTemplates.set(templateName, compiled);
 
-    this.logger.log(`Template ${templateName} đã được biên dịch thành công`);
+    this.logger.log(
+      NotificationMessages.LOG.TEMPLATE_COMPILED.replace('{{name}}', templateName),
+    );
     return compiled;
   }
 }

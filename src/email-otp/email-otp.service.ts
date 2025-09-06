@@ -26,10 +26,17 @@ export class EmailOtpService {
     try {
       const revoked = await this.otpRepo.revokeActiveByEmail(email);
       if (revoked > 0) {
-        this.logger.debug(`Revoked ${revoked} active OTP(s) for ${email}`);
+        this.logger.debug(
+          EmailOtpMessages.LOG.REVOKED_OLD_OTPS.replace('{{count}}', String(revoked)).replace(
+            '{{email}}',
+            email,
+          ),
+        );
       }
     } catch (e) {
-      this.logger.warn(`Failed to revoke existing OTPs for ${email}`);
+      this.logger.warn(
+        EmailOtpMessages.LOG.REVOKE_FAILED.replace('{{email}}', email),
+      );
     }
 
     // Tạo OTP trong database
@@ -40,7 +47,9 @@ export class EmailOtpService {
       await this.notificationService.sendOtpEmail(email, code, expiresAt);
     } catch (error) {
       // Log error nhưng không throw để không làm gián đoạn quy trình
-      this.logger.error('Failed to send OTP email', (error as Error).stack);
+      this.logger.error(
+        `${EmailOtpMessages.LOG.SEND_FAILED}: ${(error as Error).message}`,
+      );
     }
 
     return otp;
