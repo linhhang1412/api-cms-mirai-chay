@@ -14,4 +14,3 @@ export const NotificationConfig = {
     OTP: 'otp',
   },
 } as const;
-

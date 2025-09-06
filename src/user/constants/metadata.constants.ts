@@ -17,7 +17,8 @@ export const UserMetadata = {
       GET_USER_BY_ID: 'Lấy thông tin chi tiết của một người dùng theo ID',
       GET_USER_BY_EMAIL: 'Lấy thông tin chi tiết của một người dùng theo email',
       UPDATE_USER: 'Cập nhật thông tin của một người dùng theo ID',
-      DELETE_USER: 'Xóa một người dùng theo ID (có thể là xóa mềm hoặc xóa vĩnh viễn)',
+      DELETE_USER:
+        'Xóa một người dùng theo ID (có thể là xóa mềm hoặc xóa vĩnh viễn)',
     },
   },
 

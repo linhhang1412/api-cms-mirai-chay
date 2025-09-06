@@ -90,10 +90,10 @@ export class NotificationService {
 
       if (!isProd) {
         this.logger.log(
-          NotificationMessages.LOG.SENT_SUCCESS_DEV.replace('{{to}}', to).replace(
-            '{{response}}',
-            JSON.stringify(response),
-          ),
+          NotificationMessages.LOG.SENT_SUCCESS_DEV.replace(
+            '{{to}}',
+            to,
+          ).replace('{{response}}', JSON.stringify(response)),
         );
       }
     } catch (error) {
@@ -142,7 +142,10 @@ export class NotificationService {
     // Read template file
     const templatePath = path.join(this.templatesPath, `${templateName}.hbs`);
     this.logger.log(
-      NotificationMessages.LOG.READING_TEMPLATE.replace('{{path}}', templatePath),
+      NotificationMessages.LOG.READING_TEMPLATE.replace(
+        '{{path}}',
+        templatePath,
+      ),
     );
 
     const templateContent = await fs.promises.readFile(templatePath, 'utf8');
@@ -152,7 +155,10 @@ export class NotificationService {
     this.compiledTemplates.set(templateName, compiled);
 
     this.logger.log(
-      NotificationMessages.LOG.TEMPLATE_COMPILED.replace('{{name}}', templateName),
+      NotificationMessages.LOG.TEMPLATE_COMPILED.replace(
+        '{{name}}',
+        templateName,
+      ),
     );
     return compiled;
   }

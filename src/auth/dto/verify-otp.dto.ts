@@ -1,9 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, Length } from 'class-validator';
-import {
-  AuthFieldDescriptions,
-  AuthFieldExamples,
-} from '../constants';
+import { AuthFieldDescriptions, AuthFieldExamples } from '../constants';
 import { AuthConfig } from '../constants';
 
 export class VerifyOtpDto {

@@ -2,10 +2,7 @@ import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { EmailOtpRepository } from './email-otp.repository';
 import { EmailOtpEntity } from './entity/email-otp.entity';
 import { NotificationService } from '../notification/notification.service';
-import {
-  EmailOtpConstants,
-  EmailOtpMessages,
-} from './constants';
+import { EmailOtpConstants, EmailOtpMessages } from './constants';
 import { randomInt } from 'crypto';
 
 @Injectable()
@@ -27,10 +24,10 @@ export class EmailOtpService {
       const revoked = await this.otpRepo.revokeActiveByEmail(email);
       if (revoked > 0) {
         this.logger.debug(
-          EmailOtpMessages.LOG.REVOKED_OLD_OTPS.replace('{{count}}', String(revoked)).replace(
-            '{{email}}',
-            email,
-          ),
+          EmailOtpMessages.LOG.REVOKED_OLD_OTPS.replace(
+            '{{count}}',
+            String(revoked),
+          ).replace('{{email}}', email),
         );
       }
     } catch (e) {

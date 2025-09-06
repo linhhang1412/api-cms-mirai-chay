@@ -35,11 +35,18 @@ export class UserRepository {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Unique constraint violation
         if (error.code === 'P2002') {
-          throw new BadRequestException(UserMessages.ERROR.EMAIL_ALREADY_EXISTS);
+          throw new BadRequestException(
+            UserMessages.ERROR.EMAIL_ALREADY_EXISTS,
+          );
         }
       }
-      this.logger.error(UserMessages.ERROR.CREATE_USER_FAILED, (error as Error).stack);
-      throw new InternalServerErrorException(UserMessages.ERROR.CREATE_USER_FAILED);
+      this.logger.error(
+        UserMessages.ERROR.CREATE_USER_FAILED,
+        (error as Error).stack,
+      );
+      throw new InternalServerErrorException(
+        UserMessages.ERROR.CREATE_USER_FAILED,
+      );
     }
   }
 
@@ -64,7 +71,9 @@ export class UserRepository {
         }
         // Unique constraint violation
         if (error.code === 'P2002') {
-          throw new BadRequestException(UserMessages.ERROR.EMAIL_ALREADY_EXISTS);
+          throw new BadRequestException(
+            UserMessages.ERROR.EMAIL_ALREADY_EXISTS,
+          );
         }
       }
       this.logger.error(
@@ -162,8 +171,13 @@ export class UserRepository {
         total,
       };
     } catch (error) {
-      this.logger.error(UserMessages.ERROR.FETCH_USERS_FAILED, (error as Error).stack);
-      throw new InternalServerErrorException(UserMessages.ERROR.FETCH_USERS_FAILED);
+      this.logger.error(
+        UserMessages.ERROR.FETCH_USERS_FAILED,
+        (error as Error).stack,
+      );
+      throw new InternalServerErrorException(
+        UserMessages.ERROR.FETCH_USERS_FAILED,
+      );
     }
   }
 

@@ -20,7 +20,9 @@ export class UserService {
     try {
       this.logger.log(`Đang tạo người dùng với email: ${dto.email}`);
       const user = await this.userRepo.create(dto);
-      this.logger.log(`${UserMessages.SUCCESS.USER_CREATED} với ID: ${user.id}`);
+      this.logger.log(
+        `${UserMessages.SUCCESS.USER_CREATED} với ID: ${user.id}`,
+      );
 
       return user;
     } catch (error) {
@@ -28,7 +30,9 @@ export class UserService {
         `${UserMessages.ERROR.CREATE_USER_FAILED}: ${dto.email}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException(UserMessages.ERROR.CREATE_USER_FAILED);
+      throw new InternalServerErrorException(
+        UserMessages.ERROR.CREATE_USER_FAILED,
+      );
     }
   }
 
@@ -37,12 +41,19 @@ export class UserService {
     limit: number = 10,
   ): Promise<{ users: UserEntity[]; total: number }> {
     try {
-      this.logger.log(`Đang lấy danh sách người dùng - trang: ${page}, giới hạn: ${limit}`);
+      this.logger.log(
+        `Đang lấy danh sách người dùng - trang: ${page}, giới hạn: ${limit}`,
+      );
       const result = await this.userRepo.findAll(page, limit);
       return result;
     } catch (error) {
-      this.logger.error(UserMessages.ERROR.FETCH_USERS_FAILED, (error as Error).stack);
-      throw new InternalServerErrorException(UserMessages.ERROR.FETCH_USERS_FAILED);
+      this.logger.error(
+        UserMessages.ERROR.FETCH_USERS_FAILED,
+        (error as Error).stack,
+      );
+      throw new InternalServerErrorException(
+        UserMessages.ERROR.FETCH_USERS_FAILED,
+      );
     }
   }
 
@@ -94,7 +105,7 @@ export class UserService {
   async update(id: number, dto: UpdateUserDto): Promise<UserEntity> {
     try {
       this.logger.log(`Đang cập nhật người dùng với ID: ${id}`);
-      
+
       // Kiểm tra người dùng có tồn tại không
       const existingUser = await this.userRepo.findById(id);
       if (!existingUser) {
@@ -142,7 +153,9 @@ export class UserService {
       } else {
         const user = await this.userRepo.softDelete(id);
 
-        this.logger.log(`${UserMessages.SUCCESS.USER_DEACTIVATED} với ID: ${id}`);
+        this.logger.log(
+          `${UserMessages.SUCCESS.USER_DEACTIVATED} với ID: ${id}`,
+        );
         return { message: UserMessages.SUCCESS.USER_DEACTIVATED, user };
       }
     } catch (error) {

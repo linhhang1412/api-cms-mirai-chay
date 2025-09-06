@@ -27,10 +27,7 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import {
-  UserConstants,
-  UserMetadata,
-} from './constants';
+import { UserConstants, UserMetadata } from './constants';
 
 @ApiTags(UserMetadata.TAGS.USER)
 @Controller('users')

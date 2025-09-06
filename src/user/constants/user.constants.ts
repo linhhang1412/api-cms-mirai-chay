@@ -6,7 +6,7 @@ export const UserConstants = {
       USER: 'Người dùng',
     },
   },
-  
+
   // FIELD CONFIGURATIONS
   FIELDS: {
     DESCRIPTIONS: {
@@ -24,7 +24,7 @@ export const UserConstants = {
       CREATED_AT: 'Thời gian tạo bản ghi',
       UPDATED_AT: 'Thời gian cập nhật bản ghi',
     },
-    
+
     EXAMPLES: {
       EMAIL: 'nguoidung@example.com',
       FULL_NAME: 'Nguyễn Văn A',
@@ -35,7 +35,7 @@ export const UserConstants = {
       DATE: '2023-01-01T00:00:00Z',
     },
   },
-  
+
   // DEFAULT VALUES
   DEFAULTS: {
     ROLE: 'STAFF',
