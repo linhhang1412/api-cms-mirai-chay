@@ -86,3 +86,65 @@ model EmailOtp {
   @@index([email, expiresAt, used], map: "idx_otp_active")
   @@map("email_otps")
 }
+
+/// Danh mục nguyên liệu
+model IngredientCategory {
+  id        Int          @id @default(autoincrement())
+  code      String       @unique(map: "uniq_ingredient_category_code") @db.VarChar(32)
+  name      String       @db.VarChar(120)
+  active    Boolean      @default(true)
+  createdAt DateTime
+  updatedAt DateTime
+
+  ingredients Ingredient[]
+
+  @@index([active], map: "idx_ing_cat_active")
+  @@index([name], map: "idx_ing_cat_name")
+  @@map("ingredient_categories")
+}
+
+/// Đơn vị nguyên liệu (tách bảng riêng)
+model IngredientUnit {
+  id        Int     @id @default(autoincrement())
+  code      String  @unique(map: "uniq_ingredient_unit_code") @db.VarChar(32)
+  name      String  @db.VarChar(120)
+  active    Boolean @default(true)
+  createdAt DateTime
+  updatedAt DateTime
+
+  ingredients Ingredient[]
+
+  @@index([active], map: "idx_ing_unit_active")
+  @@index([name], map: "idx_ing_unit_name")
+  @@map("ingredient_units")
+}
+
+/// Nguyên liệu (chỉ cấu hình, phục vụ nhập/xuất về sau)
+model Ingredient {
+  /// Khóa chính nội bộ (int autoincrement)
+  id            Int          @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId      String       @unique @db.Uuid
+  /// Mã ngắn duy nhất (SKU)
+  code          String       @unique(map: "uniq_ingredient_code") @db.VarChar(32)
+  /// Tên nguyên liệu
+  name          String       @db.VarChar(120)
+  /// Liên kết danh mục
+  categoryId    Int?
+  category      IngredientCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  /// Liên kết đơn vị
+  unitId        Int?
+  unit          IngredientUnit? @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  /// Giá tham chiếu (VND)
+  referencePrice Decimal?     @db.Decimal(12, 2)
+  /// Trạng thái hoạt động
+  status        Status       @default(ACTIVE)
+  /// Thời gian tạo/cập nhật
+  createdAt     DateTime
+  updatedAt     DateTime
+
+  @@index([status], map: "idx_ingredient_status")
+  @@index([name], map: "idx_ingredient_name")
+  @@index([code, status], map: "idx_ingredient_code_status")
+  @@map("ingredients")
+}

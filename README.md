@@ -30,6 +30,34 @@
 This is a CMS API for Mirai Chay - a vegetarian restaurant chain management system. 
 The API provides user management and authentication features using passwordless login via email OTP.
 
+### Ingredients (CRUD)
+
+This API now includes basic CRUD for Ingredients (for later stock in/out features):
+
+- POST `/ingredients` (Admin/Manager): Create ingredient
+- GET `/ingredients` (All roles): List with pagination and optional `search`
+- GET `/ingredients/:id` (All roles): Get details
+- PUT `/ingredients/:id` (Admin/Manager): Update
+- DELETE `/ingredients/:id?hard=true` (Admin): Soft delete by default (set INACTIVE), hard delete if `hard=true`
+
+Fields: `code`, `name`, `category?`, `status (ACTIVE|INACTIVE)`.
+
+Open Swagger at `/api` after starting the server to explore.
+
+### Ingredient Categories (CRUD)
+- POST `/ingredient-categories` (Admin/Manager)
+- GET `/ingredient-categories` (All roles) with `search`, `page`, `limit`
+- GET `/ingredient-categories/:id`
+- PUT `/ingredient-categories/:id`
+- DELETE `/ingredient-categories/:id?hard=true`
+
+### Ingredient Units (CRUD)
+- POST `/ingredient-units` (Admin/Manager)
+- GET `/ingredient-units` (All roles) with `search`, `page`, `limit`
+- GET `/ingredient-units/:id`
+- PUT `/ingredient-units/:id`
+- DELETE `/ingredient-units/:id?hard=true`
+
 ## Environment Variables
 
 Create a `.env` file based on `.env.example`:

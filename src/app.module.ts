@@ -5,6 +5,9 @@ import { UserModule } from './user/user.module';
 import { PrismaModule } from './infra/prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { IngredientModule } from './ingredient/ingredient.module';
+import { IngredientCategoryModule } from './ingredient-category/ingredient-category.module';
+import { IngredientUnitModule } from './ingredient-unit/ingredient-unit.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
     PrismaModule,
     UserModule,
     AuthModule,
+    IngredientModule,
+    IngredientCategoryModule,
+    IngredientUnitModule,
   ],
   controllers: [AppController],
   providers: [AppService],
