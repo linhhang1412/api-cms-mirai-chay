@@ -8,7 +8,7 @@ import {
   IsPhoneNumber,
 } from 'class-validator';
 import { Role, Status } from 'generated/prisma';
-import { UserConstants } from '../constants/user.constants';
+import { UserConstants } from '../constants';
 
 export class CreateUserDto {
   @ApiProperty({

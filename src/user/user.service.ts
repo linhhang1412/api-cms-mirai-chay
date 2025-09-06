@@ -11,7 +11,7 @@ import { UserEntity } from './entities/user.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { Inject } from '@nestjs/common';
-import { UserMessages } from './constants/messages.constants';
+import { UserMessages } from './constants';
 
 @Injectable()
 export class UserService {

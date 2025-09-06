@@ -3,8 +3,8 @@ import { IsEmail, IsString, Length } from 'class-validator';
 import {
   AuthFieldDescriptions,
   AuthFieldExamples,
-} from '../constants/auth.constants';
-import { AuthConfig } from '../constants/config.constants';
+} from '../constants';
+import { AuthConfig } from '../constants';
 
 export class VerifyOtpDto {
   @ApiProperty({

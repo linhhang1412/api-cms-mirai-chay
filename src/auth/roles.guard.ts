@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthConstants } from './constants/system.constants';
+import { AuthConstants } from './constants';
 
 interface Request {
   user?: {

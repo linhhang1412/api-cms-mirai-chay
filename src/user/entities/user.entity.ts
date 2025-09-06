@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role, Status, User as PrismaUser } from 'generated/prisma';
-import { UserConstants } from '../constants/user.constants';
+import { UserConstants } from '../constants';
 
 export class UserEntity implements PrismaUser {
   @ApiProperty({

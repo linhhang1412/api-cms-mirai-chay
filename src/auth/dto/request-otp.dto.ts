@@ -3,7 +3,7 @@ import { IsEmail } from 'class-validator';
 import {
   AuthFieldDescriptions,
   AuthFieldExamples,
-} from '../constants/auth.constants';
+} from '../constants';
 
 export class RequestOtpDto {
   @ApiProperty({

@@ -10,7 +10,7 @@ import {
 import { Role, Status } from 'generated/prisma';
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-import { UserConstants } from '../constants/user.constants';
+import { UserConstants } from '../constants';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @ApiPropertyOptional({

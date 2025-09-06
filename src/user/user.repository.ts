@@ -11,7 +11,7 @@ import { randomUUID } from 'crypto';
 import { UserEntity } from './entities/user.entity';
 import { Status } from 'generated/prisma';
 import { Prisma } from 'generated/prisma';
-import { UserMessages } from './constants/messages.constants';
+import { UserMessages } from './constants';
 
 @Injectable()
 export class UserRepository {

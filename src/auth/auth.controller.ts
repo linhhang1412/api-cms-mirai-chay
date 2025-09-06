@@ -11,10 +11,13 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { AuthMessages } from './constants/messages.constants';
-import { AuthMetadata } from './constants/metadata.constants';
-import { AuthConfig } from './constants/config.constants';
-import { AuthApiTags } from './constants/auth.constants';
+import {
+  AuthMessages,
+  AuthMetadata,
+  RoleNames,
+  AuthApiTags,
+  AuthConfig,
+} from './constants';
 
 @ApiTags(AuthApiTags.AUTH)
 @Controller('auth')
