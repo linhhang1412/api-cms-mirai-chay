@@ -4,5 +4,6 @@ export const EmailOtpConstants = {
   DEFAULTS: {
     OTP_LENGTH: 6,
     EXPIRATION_MINUTES: 5,
+    MAX_ATTEMPTS: 5,
   },
 } as const;

@@ -39,6 +39,18 @@ export class EmailOtpRepository {
     return otp ? new EmailOtpEntity(otp) : null;
   }
 
+  async getLatestActiveOtp(email: string): Promise<EmailOtpEntity | null> {
+    const otp = await this.prisma.emailOtp.findFirst({
+      where: {
+        email,
+        used: false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return otp ? new EmailOtpEntity(otp) : null;
+  }
+
   async incrementAttempts(id: number): Promise<EmailOtpEntity> {
     const otp = await this.prisma.emailOtp.update({
       where: { id },
@@ -53,5 +65,17 @@ export class EmailOtpRepository {
       data: { used: true },
     });
     return new EmailOtpEntity(otp);
+  }
+
+  async revokeActiveByEmail(email: string): Promise<number> {
+    const res = await this.prisma.emailOtp.updateMany({
+      where: {
+        email,
+        used: false,
+        expiresAt: { gt: new Date() },
+      },
+      data: { used: true },
+    });
+    return res.count;
   }
 }
