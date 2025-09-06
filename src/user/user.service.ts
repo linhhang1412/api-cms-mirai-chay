@@ -2,7 +2,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { UserRepository } from './user.repository';
@@ -12,6 +11,7 @@ import { UserEntity } from './entities/user.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { Inject } from '@nestjs/common';
+import { UserErrorMessages, UserSuccessMessages } from './constants/messages.constants';
 
 @Injectable()
 export class UserService {
@@ -24,20 +24,20 @@ export class UserService {
 
   async create(dto: CreateUserDto): Promise<UserEntity> {
     try {
-      this.logger.log(`Creating user with email: ${dto.email}`);
+      this.logger.log(`Đang tạo người dùng với email: ${dto.email}`);
       const user = await this.userRepo.create(dto);
-      this.logger.log(`User created successfully with ID: ${user.id}`);
+      this.logger.log(`${UserSuccessMessages.USER_CREATED} với ID: ${user.id}`);
 
-      // Clear cache for getAll users
+      // Xóa cache cho danh sách tất cả người dùng
       await this.cacheManager.del('users:all');
 
       return user;
     } catch (error) {
       this.logger.error(
-        `Failed to create user with email: ${dto.email}`,
+        `${UserErrorMessages.CREATE_USER_FAILED}: ${dto.email}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to create user');
+      throw new InternalServerErrorException(UserErrorMessages.CREATE_USER_FAILED);
     }
   }
 
@@ -50,74 +50,81 @@ export class UserService {
       const cachedResult = await this.cacheManager.get(cacheKey);
 
       if (cachedResult) {
-        this.logger.log(`Returning cached result for users page ${page}`);
+        this.logger.log(`Trả về kết quả đã cache cho trang người dùng ${page}`);
         return cachedResult as { users: UserEntity[]; total: number };
       }
 
-      this.logger.log(`Fetching users - page: ${page}, limit: ${limit}`);
+      this.logger.log(`Đang lấy danh sách người dùng - trang: ${page}, giới hạn: ${limit}`);
       const result = await this.userRepo.findAll(page, limit);
 
-      // Cache the result
+      // Cache kết quả
       await this.cacheManager.set(cacheKey, result, 300000); // Cache for 5 minutes
 
       return result;
     } catch (error) {
-      this.logger.error('Failed to fetch users', (error as Error).stack);
-      throw new InternalServerErrorException('Failed to fetch users');
+      this.logger.error(
+        UserErrorMessages.FETCH_USERS_FAILED,
+        (error as Error).stack,
+      );
+      throw new InternalServerErrorException(
+        UserErrorMessages.FETCH_USERS_FAILED,
+      );
     }
   }
 
   async getById(id: number): Promise<UserEntity> {
     try {
-      this.logger.log(`Fetching user by ID: ${id}`);
-
+      this.logger.log(`Đang lấy thông tin người dùng theo ID: ${id}`);
+      
       const cacheKey = `user:id:${id}`;
       const cachedUser = await this.cacheManager.get(cacheKey);
-
+      
       if (cachedUser) {
-        this.logger.log(`Returning cached user with ID: ${id}`);
+        this.logger.log(`Trả về người dùng đã cache với ID: ${id}`);
         return cachedUser as UserEntity;
       }
-
+      
       const user = await this.userRepo.findById(id);
       if (!user) {
-        throw new NotFoundException(`User with ID ${id} not found`);
+        throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
       }
-
-      // Cache the user
-      await this.cacheManager.set(cacheKey, user, 300000); // Cache for 5 minutes
-
+      
+      // Cache người dùng
+      await this.cacheManager.set(cacheKey, user, 300000); // Cache trong 5 phút
+      
       return user;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
       this.logger.error(
-        `Failed to fetch user by ID: ${id}`,
+        `${UserErrorMessages.FETCH_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to fetch user');
+      throw new InternalServerErrorException(
+        UserErrorMessages.FETCH_USER_FAILED,
+      );
     }
   }
 
   async getByEmail(email: string): Promise<UserEntity> {
     try {
-      this.logger.log(`Fetching user by email: ${email}`);
+      this.logger.log(`Đang lấy thông tin người dùng theo email: ${email}`);
 
       const cacheKey = `user:email:${email}`;
       const cachedUser = await this.cacheManager.get(cacheKey);
 
       if (cachedUser) {
-        this.logger.log(`Returning cached user with email: ${email}`);
+        this.logger.log(`Trả về người dùng đã cache với email: ${email}`);
         return cachedUser as UserEntity;
       }
 
       const user = await this.userRepo.findByEmail(email);
       if (!user) {
-        throw new NotFoundException(`User with email ${email} not found`);
+        throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
       }
 
-      // Cache the user
+      // Cache người dùng
       await this.cacheManager.set(cacheKey, user, 300000); // Cache for 5 minutes
 
       return user;
@@ -126,41 +133,45 @@ export class UserService {
         throw error;
       }
       this.logger.error(
-        `Failed to fetch user by email: ${email}`,
+        `${UserErrorMessages.FETCH_USER_FAILED}: ${email}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to fetch user');
+      throw new InternalServerErrorException(
+        UserErrorMessages.FETCH_USER_FAILED,
+      );
     }
   }
 
   async update(id: number, dto: UpdateUserDto): Promise<UserEntity> {
     try {
-      this.logger.log(`Updating user with ID: ${id}`);
+      this.logger.log(`Đang cập nhật người dùng với ID: ${id}`);
 
-      // Check if user exists
+      // Kiểm tra người dùng có tồn tại không
       const existingUser = await this.userRepo.findById(id);
       if (!existingUser) {
-        throw new NotFoundException(`User with ID ${id} not found`);
+        throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
       }
 
       const user = await this.userRepo.update(id, dto);
 
-      // Clear cache for this user and all users
+      // Xóa cache cho người dùng này và tất cả người dùng
       await this.cacheManager.del(`user:id:${id}`);
       await this.cacheManager.del(`user:email:${user.email}`);
       await this.cacheManager.del('users:all');
 
-      this.logger.log(`User updated successfully with ID: ${id}`);
+      this.logger.log(`Cập nhật người dùng thành công với ID: ${id}`);
       return user;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
       this.logger.error(
-        `Failed to update user with ID: ${id}`,
+        `${UserErrorMessages.UPDATE_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to update user');
+      throw new InternalServerErrorException(
+        UserErrorMessages.UPDATE_USER_FAILED,
+      );
     }
   }
 
@@ -170,44 +181,46 @@ export class UserService {
   ): Promise<{ message: string; user?: UserEntity }> {
     try {
       this.logger.log(
-        `Deleting user with ID: ${id}, hardDelete: ${hardDelete}`,
+        `Đang xóa người dùng với ID: ${id}, xóa vĩnh viễn: ${hardDelete}`,
       );
 
-      // Check if user exists
+      // Kiểm tra người dùng có tồn tại không
       const existingUser = await this.userRepo.findById(id);
       if (!existingUser) {
-        throw new NotFoundException(`User with ID ${id} not found`);
+        throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
       }
 
       if (hardDelete) {
         await this.userRepo.hardDelete(id);
-        // Clear cache for this user and all users
+        // Xóa cache cho người dùng này và tất cả người dùng
         await this.cacheManager.del(`user:id:${id}`);
         await this.cacheManager.del(`user:email:${existingUser.email}`);
         await this.cacheManager.del('users:all');
 
-        this.logger.log(`User permanently deleted with ID: ${id}`);
-        return { message: 'User permanently deleted' };
+        this.logger.log(`${UserSuccessMessages.USER_DELETED} với ID: ${id}`);
+        return { message: UserSuccessMessages.USER_DELETED };
       } else {
         const user = await this.userRepo.softDelete(id);
 
-        // Clear cache for this user and all users
+        // Xóa cache cho người dùng này và tất cả người dùng
         await this.cacheManager.del(`user:id:${id}`);
         await this.cacheManager.del(`user:email:${user.email}`);
         await this.cacheManager.del('users:all');
 
-        this.logger.log(`User deactivated with ID: ${id}`);
-        return { message: 'User deactivated', user };
+        this.logger.log(`${UserSuccessMessages.USER_DEACTIVATED} với ID: ${id}`);
+        return { message: UserSuccessMessages.USER_DEACTIVATED, user };
       }
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
       this.logger.error(
-        `Failed to delete user with ID: ${id}`,
+        `${UserErrorMessages.DELETE_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to delete user');
+      throw new InternalServerErrorException(
+        UserErrorMessages.DELETE_USER_FAILED,
+      );
     }
   }
 }

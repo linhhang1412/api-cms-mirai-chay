@@ -3,37 +3,36 @@ import { Role, Status, User as PrismaUser } from 'generated/prisma';
 import {
   UserFieldDescriptions,
   UserFieldExamples,
-  UserFieldExamples as Examples,
 } from '../constants/fields.constants';
 
 export class UserEntity implements PrismaUser {
   @ApiProperty({
-    example: Examples.ID,
+    example: UserFieldExamples.ID,
     description: UserFieldDescriptions.ID,
   })
   id: number;
 
   @ApiProperty({
-    example: Examples.PUBLIC_ID,
+    example: UserFieldExamples.PUBLIC_ID,
     description: UserFieldDescriptions.PUBLIC_ID,
   })
   publicId: string;
 
   @ApiProperty({
-    example: Examples.EMAIL,
+    example: UserFieldExamples.EMAIL,
     description: UserFieldDescriptions.EMAIL,
   })
   email: string;
 
   @ApiProperty({
-    example: Examples.FULL_NAME,
+    example: UserFieldExamples.FULL_NAME,
     description: UserFieldDescriptions.FULL_NAME,
     nullable: true,
   })
   fullName: string | null;
 
   @ApiProperty({
-    example: Examples.PHONE,
+    example: UserFieldExamples.PHONE,
     description: UserFieldDescriptions.PHONE,
     nullable: true,
   })
@@ -47,7 +46,7 @@ export class UserEntity implements PrismaUser {
   role: Role;
 
   @ApiProperty({
-    example: Examples.AVATAR,
+    example: UserFieldExamples.AVATAR,
     description: UserFieldDescriptions.AVATAR,
     nullable: true,
   })
@@ -61,34 +60,34 @@ export class UserEntity implements PrismaUser {
   status: Status;
 
   @ApiProperty({
-    example: Examples.DATE,
+    example: UserFieldExamples.DATE,
     description: UserFieldDescriptions.LAST_LOGIN_AT,
     nullable: true,
   })
   lastLoginAt: Date | null;
 
   @ApiProperty({
-    example: Examples.DATE,
+    example: UserFieldExamples.DATE,
     description: UserFieldDescriptions.LAST_OTP_SENT_AT,
     nullable: true,
   })
   lastOtpSentAt: Date | null;
 
   @ApiProperty({
-    example: Examples.DATE,
+    example: UserFieldExamples.DATE,
     description: UserFieldDescriptions.FAILED_LOGIN_AT,
     nullable: true,
   })
   failedLoginAt: Date | null;
 
   @ApiProperty({
-    example: Examples.DATE,
+    example: UserFieldExamples.DATE,
     description: UserFieldDescriptions.CREATED_AT,
   })
   createdAt: Date;
 
   @ApiProperty({
-    example: Examples.DATE,
+    example: UserFieldExamples.DATE,
     description: UserFieldDescriptions.UPDATED_AT,
   })
   updatedAt: Date;

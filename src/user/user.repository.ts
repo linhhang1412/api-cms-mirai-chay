@@ -11,6 +11,7 @@ import { randomUUID } from 'crypto';
 import { UserEntity } from './entities/user.entity';
 import { Status } from 'generated/prisma';
 import { Prisma } from 'generated/prisma';
+import { UserErrorMessages, UserSuccessMessages } from './constants/messages.constants';
 
 @Injectable()
 export class UserRepository {
@@ -34,11 +35,11 @@ export class UserRepository {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Unique constraint violation
         if (error.code === 'P2002') {
-          throw new BadRequestException('Email already exists');
+          throw new BadRequestException(UserErrorMessages.EMAIL_ALREADY_EXISTS);
         }
       }
-      this.logger.error('Failed to create user', (error as Error).stack);
-      throw new InternalServerErrorException('Failed to create user');
+      this.logger.error(UserErrorMessages.CREATE_USER_FAILED, (error as Error).stack);
+      throw new InternalServerErrorException(UserErrorMessages.CREATE_USER_FAILED);
     }
   }
 
@@ -59,18 +60,20 @@ export class UserRepository {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Record not found
         if (error.code === 'P2025') {
-          throw new NotFoundException(`User with ID ${id} not found`);
+          throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
         }
         // Unique constraint violation
         if (error.code === 'P2002') {
-          throw new BadRequestException('Email already exists');
+          throw new BadRequestException(UserErrorMessages.EMAIL_ALREADY_EXISTS);
         }
       }
       this.logger.error(
-        `Failed to update user with ID: ${id}`,
+        `${UserErrorMessages.UPDATE_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to update user');
+      throw new InternalServerErrorException(
+        UserErrorMessages.UPDATE_USER_FAILED,
+      );
     }
   }
 
@@ -85,10 +88,12 @@ export class UserRepository {
       return user ? new UserEntity(user) : null;
     } catch (error) {
       this.logger.error(
-        `Failed to find user by ID: ${id}`,
+        `${UserErrorMessages.FETCH_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to fetch user');
+      throw new InternalServerErrorException(
+        UserErrorMessages.FETCH_USER_FAILED,
+      );
     }
   }
 
@@ -103,10 +108,12 @@ export class UserRepository {
       return user ? new UserEntity(user) : null;
     } catch (error) {
       this.logger.error(
-        `Failed to find user by email: ${email}`,
+        `${UserErrorMessages.FETCH_USER_FAILED}: ${email}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to fetch user');
+      throw new InternalServerErrorException(
+        UserErrorMessages.FETCH_USER_FAILED,
+      );
     }
   }
 
@@ -121,10 +128,12 @@ export class UserRepository {
       return user ? new UserEntity(user) : null;
     } catch (error) {
       this.logger.error(
-        `Failed to find user by public ID: ${publicId}`,
+        `${UserErrorMessages.FETCH_USER_FAILED}: ${publicId}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to fetch user');
+      throw new InternalServerErrorException(
+        UserErrorMessages.FETCH_USER_FAILED,
+      );
     }
   }
 
@@ -153,8 +162,8 @@ export class UserRepository {
         total,
       };
     } catch (error) {
-      this.logger.error('Failed to fetch all users', (error as Error).stack);
-      throw new InternalServerErrorException('Failed to fetch users');
+      this.logger.error(UserErrorMessages.FETCH_USERS_FAILED, (error as Error).stack);
+      throw new InternalServerErrorException(UserErrorMessages.FETCH_USERS_FAILED);
     }
   }
 
@@ -175,14 +184,16 @@ export class UserRepository {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Record not found
         if (error.code === 'P2025') {
-          throw new NotFoundException(`User with ID ${id} not found`);
+          throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
         }
       }
       this.logger.error(
-        `Failed to soft delete user with ID: ${id}`,
+        `${UserErrorMessages.DEACTIVATE_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to deactivate user');
+      throw new InternalServerErrorException(
+        UserErrorMessages.DEACTIVATE_USER_FAILED,
+      );
     }
   }
 
@@ -193,14 +204,16 @@ export class UserRepository {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Record not found
         if (error.code === 'P2025') {
-          throw new NotFoundException(`User with ID ${id} not found`);
+          throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
         }
       }
       this.logger.error(
-        `Failed to hard delete user with ID: ${id}`,
+        `${UserErrorMessages.DELETE_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException('Failed to delete user');
+      throw new InternalServerErrorException(
+        UserErrorMessages.DELETE_USER_FAILED,
+      );
     }
   }
 }

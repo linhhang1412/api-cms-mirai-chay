@@ -113,13 +113,13 @@ export class UserController {
     name: 'page',
     required: false,
     type: Number,
-    description: 'Page number (default: 1)',
+    description: 'Số trang (mặc định: 1)',
   })
   @ApiQuery({
     name: 'limit',
     required: false,
     type: Number,
-    description: 'Items per page (default: 10)',
+    description: 'Số mục mỗi trang (mặc định: 10)',
   })
   async findAll(
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
