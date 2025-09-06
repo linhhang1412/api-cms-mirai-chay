@@ -1,12 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail } from 'class-validator';
-import { AuthDtoDescriptions, AuthDtoExamples } from '../auth.messages';
+import {
+  AuthFieldDescriptions,
+  AuthFieldExamples,
+} from '../constants/auth.constants';
 
 export class RequestOtpDto {
-    @ApiProperty({ 
-        description: AuthDtoDescriptions.EMAIL,
-        example: AuthDtoExamples.EMAIL
-    })
-    @IsEmail()
-    email: string;
+  @ApiProperty({
+    description: AuthFieldDescriptions.EMAIL,
+    example: AuthFieldExamples.EMAIL,
+  })
+  @IsEmail()
+  email: string;
 }

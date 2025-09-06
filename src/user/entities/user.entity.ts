@@ -1,32 +1,40 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role, Status, User as PrismaUser } from 'generated/prisma';
+import {
+  UserFieldDescriptions,
+  UserFieldExamples,
+  UserFieldExamples as Examples,
+} from '../constants/fields.constants';
 
 export class UserEntity implements PrismaUser {
-  @ApiProperty({ example: 1, description: 'ID nội bộ của người dùng' })
+  @ApiProperty({
+    example: Examples.ID,
+    description: UserFieldDescriptions.ID,
+  })
   id: number;
 
   @ApiProperty({
-    example: '550e8400-e29b-41d4-a716-446655440000',
-    description: 'ID công khai của người dùng (UUID)',
+    example: Examples.PUBLIC_ID,
+    description: UserFieldDescriptions.PUBLIC_ID,
   })
   publicId: string;
 
   @ApiProperty({
-    example: 'nguoidung@example.com',
-    description: 'Địa chỉ email của người dùng',
+    example: Examples.EMAIL,
+    description: UserFieldDescriptions.EMAIL,
   })
   email: string;
 
   @ApiProperty({
-    example: 'Nguyễn Văn A',
-    description: 'Họ và tên của người dùng',
+    example: Examples.FULL_NAME,
+    description: UserFieldDescriptions.FULL_NAME,
     nullable: true,
   })
   fullName: string | null;
 
   @ApiProperty({
-    example: '0123456789',
-    description: 'Số điện thoại của người dùng',
+    example: Examples.PHONE,
+    description: UserFieldDescriptions.PHONE,
     nullable: true,
   })
   phone: string | null;
@@ -34,13 +42,13 @@ export class UserEntity implements PrismaUser {
   @ApiProperty({
     enum: Role,
     example: Role.STAFF,
-    description: 'Vai trò của người dùng',
+    description: UserFieldDescriptions.ROLE,
   })
   role: Role;
 
   @ApiProperty({
-    example: 'https://example.com/avatar.jpg',
-    description: 'URL ảnh đại diện',
+    example: Examples.AVATAR,
+    description: UserFieldDescriptions.AVATAR,
     nullable: true,
   })
   avatar: string | null;
@@ -48,40 +56,40 @@ export class UserEntity implements PrismaUser {
   @ApiProperty({
     enum: Status,
     example: Status.ACTIVE,
-    description: 'Trạng thái của người dùng',
+    description: UserFieldDescriptions.STATUS,
   })
   status: Status;
 
   @ApiProperty({
-    example: '2023-01-01T00:00:00Z',
-    description: 'Thời gian đăng nhập lần cuối',
+    example: Examples.DATE,
+    description: UserFieldDescriptions.LAST_LOGIN_AT,
     nullable: true,
   })
   lastLoginAt: Date | null;
 
   @ApiProperty({
-    example: '2023-01-01T00:00:00Z',
-    description: 'Thời gian gửi OTP lần cuối',
+    example: Examples.DATE,
+    description: UserFieldDescriptions.LAST_OTP_SENT_AT,
     nullable: true,
   })
   lastOtpSentAt: Date | null;
 
   @ApiProperty({
-    example: '2023-01-01T00:00:00Z',
-    description: 'Thời gian đăng nhập thất bại lần cuối',
+    example: Examples.DATE,
+    description: UserFieldDescriptions.FAILED_LOGIN_AT,
     nullable: true,
   })
   failedLoginAt: Date | null;
 
   @ApiProperty({
-    example: '2023-01-01T00:00:00Z',
-    description: 'Thời gian tạo bản ghi',
+    example: Examples.DATE,
+    description: UserFieldDescriptions.CREATED_AT,
   })
   createdAt: Date;
 
   @ApiProperty({
-    example: '2023-01-01T00:00:00Z',
-    description: 'Thời gian cập nhật bản ghi',
+    example: Examples.DATE,
+    description: UserFieldDescriptions.UPDATED_AT,
   })
   updatedAt: Date;
 

@@ -1,22 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, Length } from 'class-validator';
-import { AuthDtoDescriptions, AuthDtoExamples, AuthOtpConfig } from '../auth.messages';
+import {
+  AuthFieldDescriptions,
+  AuthFieldExamples,
+} from '../constants/auth.constants';
+import { AuthConfig } from '../constants/config.constants';
 
 export class VerifyOtpDto {
-    @ApiProperty({ 
-        description: AuthDtoDescriptions.EMAIL,
-        example: AuthDtoExamples.EMAIL
-    })
-    @IsEmail()
-    email: string;
+  @ApiProperty({
+    description: AuthFieldDescriptions.EMAIL,
+    example: AuthFieldExamples.EMAIL,
+  })
+  @IsEmail()
+  email: string;
 
-    @ApiProperty({ 
-        description: AuthDtoDescriptions.OTP_CODE,
-        example: AuthDtoExamples.OTP_CODE,
-        minLength: AuthOtpConfig.LENGTH,
-        maxLength: AuthOtpConfig.LENGTH
-    })
-    @IsString()
-    @Length(AuthOtpConfig.LENGTH, AuthOtpConfig.LENGTH)
-    code: string;
+  @ApiProperty({
+    description: AuthFieldDescriptions.OTP_CODE,
+    example: AuthFieldExamples.OTP_CODE,
+    minLength: AuthConfig.OTP.CODE_LENGTH,
+    maxLength: AuthConfig.OTP.CODE_LENGTH,
+  })
+  @IsString()
+  @Length(AuthConfig.OTP.CODE_LENGTH, AuthConfig.OTP.CODE_LENGTH)
+  code: string;
 }

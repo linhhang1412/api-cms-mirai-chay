@@ -1,36 +1,49 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+  IsPhoneNumber,
+} from 'class-validator';
 import { Role, Status } from 'generated/prisma';
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
+import {
+  UserFieldDescriptions,
+  UserFieldExamples,
+} from '../constants/fields.constants';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @ApiPropertyOptional({
-    description: 'Địa chỉ email của người dùng',
-    example: 'nguoidung@example.com',
+    description: UserFieldDescriptions.EMAIL,
+    example: UserFieldExamples.EMAIL,
   })
   @IsEmail()
   @IsOptional()
+  @MaxLength(100)
   email?: string;
 
   @ApiPropertyOptional({
-    description: 'Họ và tên của người dùng',
-    example: 'Nguyễn Văn A',
+    description: UserFieldDescriptions.FULL_NAME,
+    example: UserFieldExamples.FULL_NAME,
   })
   @IsString()
   @IsOptional()
+  @MaxLength(100)
   fullName?: string;
 
   @ApiPropertyOptional({
-    description: 'Số điện thoại của người dùng',
-    example: '0123456789',
+    description: UserFieldDescriptions.PHONE,
+    example: UserFieldExamples.PHONE,
   })
-  @IsString()
+  @IsPhoneNumber('VN') // Vietnam phone number validation
   @IsOptional()
   phone?: string;
 
   @ApiPropertyOptional({
-    description: 'Vai trò của người dùng',
+    description: UserFieldDescriptions.ROLE,
     enum: Role,
     example: Role.MANAGER,
   })
@@ -39,7 +52,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   role?: Role;
 
   @ApiPropertyOptional({
-    description: 'Trạng thái của người dùng',
+    description: UserFieldDescriptions.STATUS,
     enum: Status,
     example: Status.INACTIVE,
   })

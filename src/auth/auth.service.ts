@@ -6,7 +6,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { EmailOtpService } from '../email-otp/email-otp.service';
 import { UserRepository } from '../user/user.repository';
-import { AuthErrorMessages, AuthSuccessMessages, AuthJwtConfig } from './auth.messages';
+import { AuthMessages } from './constants/messages.constants';
+import { AuthConfig } from './constants/config.constants';
 
 @Injectable()
 export class AuthService {
@@ -20,30 +21,35 @@ export class AuthService {
     // Kiểm tra user, nếu chưa có thì báo lỗi
     const user = await this.userRepo.findByEmail(email);
     if (!user) {
-      throw new BadRequestException(AuthErrorMessages.EMAIL_NOT_REGISTERED);
+      throw new BadRequestException(AuthMessages.ERROR.EMAIL_NOT_REGISTERED);
     }
 
     const otp = await this.otpService.generateOtp(email, user.id);
-    return { message: AuthSuccessMessages.OTP_SENT, expiresAt: otp.expiresAt };
+    return {
+      message: AuthMessages.SUCCESS.OTP_SENT_TO_EMAIL,
+      expiresAt: otp.expiresAt,
+    };
   }
 
   async verifyOtp(email: string, code: string) {
     const otp = await this.otpService.verifyOtp(email, code);
     if (!otp) {
-      throw new UnauthorizedException(AuthErrorMessages.OTP_INVALID_OR_EXPIRED);
+      throw new UnauthorizedException(
+        AuthMessages.ERROR.OTP_INVALID_OR_EXPIRED,
+      );
     }
 
     const user = await this.userRepo.findByEmail(email);
     if (!user) {
-      throw new UnauthorizedException(AuthErrorMessages.USER_NOT_FOUND);
+      throw new UnauthorizedException(AuthMessages.ERROR.USER_NOT_FOUND);
     }
 
     const payload = { sub: user.publicId, email: user.email, role: user.role };
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: AuthJwtConfig.ACCESS_TOKEN_EXPIRES_IN,
+      expiresIn: AuthConfig.JWT.ACCESS_TOKEN_EXPIRES,
     });
     const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: AuthJwtConfig.REFRESH_TOKEN_EXPIRES_IN,
+      expiresIn: AuthConfig.JWT.REFRESH_TOKEN_EXPIRES,
     });
 
     return {
@@ -58,13 +64,15 @@ export class AuthService {
       const payload = await this.jwtService.verifyAsync(refreshToken);
       // Kiểm tra payload có chứa email không
       if (!payload || !payload.email) {
-        throw new UnauthorizedException(AuthErrorMessages.INVALID_REFRESH_TOKEN);
+        throw new UnauthorizedException(
+          AuthMessages.ERROR.TOKEN_REFRESH_INVALID,
+        );
       }
 
       const user = await this.userRepo.findByEmail(payload.email);
 
       if (!user) {
-        throw new UnauthorizedException(AuthErrorMessages.USER_NOT_FOUND);
+        throw new UnauthorizedException(AuthMessages.ERROR.USER_NOT_FOUND);
       }
 
       const newPayload = {
@@ -73,12 +81,12 @@ export class AuthService {
         role: user.role,
       };
       const newAccessToken = await this.jwtService.signAsync(newPayload, {
-        expiresIn: AuthJwtConfig.ACCESS_TOKEN_EXPIRES_IN,
+        expiresIn: AuthConfig.JWT.ACCESS_TOKEN_EXPIRES,
       });
 
       return { accessToken: newAccessToken };
     } catch {
-      throw new UnauthorizedException(AuthErrorMessages.INVALID_REFRESH_TOKEN);
+      throw new UnauthorizedException(AuthMessages.ERROR.TOKEN_REFRESH_INVALID);
     }
   }
 }

@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { EmailOtpRepository } from './email-otp.repository';
 import { EmailOtpEntity } from './entity/email-otp.entity';
 import { NotificationService } from '../notification/notification.service';
-import { AuthOtpConfig } from '../auth/auth.messages';
+import { AuthConfig } from '../auth/constants/config.constants';
 
 @Injectable()
 export class EmailOtpService {
@@ -13,7 +13,9 @@ export class EmailOtpService {
 
   async generateOtp(email: string, userId?: number): Promise<EmailOtpEntity> {
     const code = this.generateCode();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 phút
+    const expiresAt = new Date(
+      Date.now() + AuthConfig.OTP.EXPIRATION_MINUTES * 60 * 1000,
+    ); // 5 phút
 
     // Tạo OTP trong database
     const otp = await this.otpRepo.create(email, code, expiresAt, userId);
@@ -46,8 +48,8 @@ export class EmailOtpService {
 
   private generateCode(): string {
     // Tạo mã OTP với độ dài được cấu hình
-    const min = Math.pow(10, AuthOtpConfig.LENGTH - 1);
-    const max = Math.pow(10, AuthOtpConfig.LENGTH) - 1;
+    const min = Math.pow(10, AuthConfig.OTP.CODE_LENGTH - 1);
+    const max = Math.pow(10, AuthConfig.OTP.CODE_LENGTH) - 1;
     return Math.floor(min + Math.random() * (max - min + 1)).toString();
   }
 }
