@@ -216,4 +216,33 @@ export class UserRepository {
       );
     }
   }
+
+  async setLastOtpSentAt(id: number, when: Date): Promise<UserEntity> {
+    try {
+      const user = await this.prisma.user.update({
+        where: { id },
+        data: {
+          lastOtpSentAt: when,
+          updatedAt: new Date(),
+        },
+        include: {
+          emailOtps: true,
+        },
+      });
+      return new UserEntity(user);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException(UserMessages.ERROR.USER_NOT_FOUND);
+        }
+      }
+      this.logger.error(
+        `${UserMessages.ERROR.UPDATE_USER_FAILED}: ${id}`,
+        (error as Error).stack,
+      );
+      throw new InternalServerErrorException(
+        UserMessages.ERROR.UPDATE_USER_FAILED,
+      );
+    }
+  }
 }

@@ -24,6 +24,8 @@ export class AuthService {
     }
 
     const otp = await this.otpService.generateOtp(email, user.id);
+    // cập nhật thời gian gửi OTP gần nhất
+    await this.userRepo.setLastOtpSentAt(user.id, new Date());
     return {
       message: AuthMessages.SUCCESS.OTP_SENT_TO_EMAIL,
       expiresAt: otp.expiresAt,

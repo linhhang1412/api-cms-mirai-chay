@@ -7,7 +7,7 @@ import { EmailOtpModule } from '../email-otp/email-otp.module';
 import { UserModule } from '../user/user.module';
 import { NotificationModule } from '../notification/notification.module';
 import { RolesGuard } from './roles.guard';
-import { AuthJwtConfig } from './auth.messages';
+import { AuthConfig } from './constants';
 
 @Module({
   imports: [
@@ -15,8 +15,8 @@ import { AuthJwtConfig } from './auth.messages';
     EmailOtpModule,
     NotificationModule,
     JwtModule.register({
-      secret: AuthJwtConfig.SECRET,
-      signOptions: { expiresIn: AuthJwtConfig.ACCESS_TOKEN_EXPIRES_IN },
+      secret: AuthConfig.JWT.SECRET_KEY,
+      signOptions: { expiresIn: AuthConfig.JWT.ACCESS_TOKEN_EXPIRES },
     }),
   ],
   providers: [AuthService, JwtStrategy, RolesGuard],

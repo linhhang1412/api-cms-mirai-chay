@@ -10,14 +10,23 @@ import * as Handlebars from 'handlebars';
 
 @Injectable()
 export class NotificationService {
-  private readonly resend: Resend;
+  private readonly resend: Resend | null;
   private readonly templatesPath: string;
   private readonly compiledTemplates: Map<string, Handlebars.TemplateDelegate> =
     new Map();
   private readonly logger = new Logger(NotificationService.name);
+  private readonly dryRun: boolean;
 
   constructor() {
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      this.logger.warn('RESEND_API_KEY is not set. Email sending is in dry-run mode.');
+      this.resend = null;
+      this.dryRun = true;
+    } else {
+      this.resend = new Resend(apiKey);
+      this.dryRun = false;
+    }
     // Sử dụng đường dẫn tương đối đến thư mục templates
     this.templatesPath = path.join(__dirname, 'templates');
 
@@ -48,14 +57,19 @@ export class NotificationService {
 
       this.logger.log(`Template email OTP đã được tạo cho ${to}`);
 
-      // Log email content for debugging (remove in production)
-      this.logger.debug(
-        `Nội dung email OTP cho ${to}: ${html.substring(0, 100)}...`,
-      );
+      // Log content only in non-production and dry-run
+      const isProd = process.env.NODE_ENV === 'production';
+      if (!isProd) {
+        this.logger.debug(`OTP for ${to}: [REDACTED in logs]. Expires at: ${expiresAt.toISOString()}`);
+      }
 
-      // Send email via Resend
-      this.logger.log(`Đang gửi email OTP đến ${to} với mã ${code}`);
+      // Send email via Resend or dry-run
+      if (this.dryRun || !this.resend) {
+        this.logger.log(`Dry-run: pretend sending OTP email to ${to}`);
+        return;
+      }
 
+      this.logger.log(`Đang gửi email OTP đến ${to}`);
       const response = await this.resend.emails.send({
         from: 'Mirai Chay <no-reply@dev.miraichay.com>',
         to,
@@ -63,11 +77,15 @@ export class NotificationService {
         html,
       });
 
-      this.logger.log(
-        `Email OTP đã được gửi thành công đến ${to}. Response: ${JSON.stringify(response)}`,
-      );
+      if (!isProd) {
+        this.logger.log(
+          `Email OTP đã được gửi thành công đến ${to}. Response: ${JSON.stringify(
+            response,
+          )}`,
+        );
+      }
     } catch (error) {
-      this.logger.error(`Failed to send OTP email to ${to}:`, error);
+      this.logger.error(`Failed to send OTP email to ${to}: ${(error as Error).message}`);
       throw new InternalServerErrorException('Failed to send OTP email');
     }
   }
