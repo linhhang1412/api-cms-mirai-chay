@@ -26,7 +26,7 @@ Mỗi module (auth, user, email-otp, notification) có thư mục `constants/` r
 
 1. **Pattern**: `CATEGORY_SUBCATEGORY_TYPE`
 2. **Viết hoa hết**
-3. **Dùng `_` để phân tách từ**
+3. **Dùng `_` để phân tách từ`
 4. **Tên nói lên ý nghĩa**
 
 Ví dụ:
@@ -151,21 +151,51 @@ export const UserMetadata = {
 } as const;
 ```
 
-## Cách sử dụng constants
+## Sử dụng index.ts để đơn giản hóa
 
-### 1. Import đúng cách
+### Cấu trúc thư mục với index.ts:
 
-```typescript
-// Đúng - Import cụ thể những gì cần dùng
-import { UserConstants } from './constants/user.constants';
-import { UserMessages } from './constants/messages.constants';
-import { UserMetadata } from './constants/metadata.constants';
-
-// Sai - Import toàn bộ
-import * as UserConstants from './constants/user.constants';
+```
+src/[module]/constants/
+├── [module].constants.ts    → Constants cơ bản
+├── messages.constants.ts    → Messages lỗi/thành công
+├── metadata.constants.ts    → Metadata API
+├── config.constants.ts     → Cấu hình (nếu cần)
+├── roles.constants.ts      → Roles (nếu cần)
+├── system.constants.ts      → System constants (nếu cần)
+└── index.ts                → Export tất cả để đơn giản hóa imports
 ```
 
-### 2. Sử dụng trong DTO
+### index.ts mẫu:
+
+```typescript
+// Export tất cả từ các file constants
+export * from './auth.constants';
+export * from './config.constants';
+export * from './messages.constants';
+export * from './metadata.constants';
+export * from './roles.constants';
+export * from './system.constants';
+```
+
+## Cách sử dụng constants
+
+### 1. Import đơn giản từ index.ts:
+
+```typescript
+// Import theo nhu cầu - chỉ cần 1 dòng
+import {
+  AuthMessages,
+  AuthMetadata,
+  AuthConfig,
+  AuthApiTags,
+} from './constants';
+
+// Import cụ thể từng constant nếu cần
+import { AuthMessages } from './constants';
+```
+
+### 2. Sử dụng trong DTO:
 
 ```typescript
 @ApiProperty({
@@ -175,43 +205,42 @@ import * as UserConstants from './constants/user.constants';
 email: string;
 ```
 
-### 3. Sử dụng trong Controller
+### 3. Sử dụng trong Controller:
 
 ```typescript
-@ApiTags(UserMetadata.TAGS.USER)
-@Controller('users')
-export class UserController {
-  @Post()
+@ApiTags(AuthMetadata.TAGS.AUTH)
+@Controller('auth')
+export class AuthController {
+  @Post('request-otp')
   @ApiOperation({
-    summary: UserMetadata.OPERATION.SUMMARY.CREATE_USER,
-    description: UserMetadata.OPERATION.DESCRIPTION.CREATE_USER,
+    summary: AuthMetadata.OPERATION.SUMMARY.REQUEST_OTP,
+    description: AuthMetadata.OPERATION.DESCRIPTION.REQUEST_OTP,
   })
   @ApiResponse({
     status: 201,
-    description: UserMetadata.RESPONSES.CREATE_USER_SUCCESS,
+    description: AuthMetadata.RESPONSES.OTP_EMAIL_SENT,
   })
-  async create(@Body() dto: CreateUserDto) {
+  async requestOtp(@Body() dto: RequestOtpDto) {
     // ...
   }
 }
 ```
 
-### 4. Sử dụng trong Service
+### 4. Sử dụng trong Service:
 
 ```typescript
 @Injectable()
-export class UserService {
-  async create(dto: CreateUserDto): Promise<UserEntity> {
+export class AuthService {
+  async requestOtp(email: string): Promise<void> {
     try {
-      const user = await this.userRepo.create(dto);
-      this.logger.log(`${UserMessages.SUCCESS.USER_CREATED} với ID: ${user.id}`);
-      return user;
+      // ...
+      this.logger.log(`${AuthMessages.SUCCESS.OTP_EMAIL_SENT}: ${email}`);
     } catch (error) {
       this.logger.error(
-        `${UserMessages.ERROR.CREATE_USER_FAILED}: ${dto.email}`,
+        `${AuthMessages.ERROR.OTP_EMAIL_SEND_FAILED}: ${email}`,
         error.stack,
       );
-      throw new InternalServerErrorException(UserMessages.ERROR.CREATE_USER_FAILED);
+      throw new InternalServerErrorException(AuthMessages.ERROR.OTP_EMAIL_SEND_FAILED);
     }
   }
 }
@@ -225,10 +254,10 @@ Thay vì hardcode giá trị, luôn sử dụng constants:
 
 ```typescript
 // Đúng
-throw new BadRequestException(UserMessages.ERROR.EMAIL_ALREADY_EXISTS);
+throw new BadRequestException(AuthMessages.ERROR.EMAIL_NOT_REGISTERED);
 
 // Sai
-throw new BadRequestException('Email đã tồn tại');
+throw new BadRequestException('Email chưa được đăng ký trong hệ thống');
 ```
 
 ### 2. Tổ chức theo ngữ cảnh
@@ -347,4 +376,4 @@ export const UserConstants = {
 
 ## Kết luận
 
-Việc sử dụng constants theo cấu trúc nhất quán giúp dự án dễ bảo trì, dễ đọc và dễ mở rộng. Luôn tuân thủ các quy tắc đặt tên và tổ chức để đảm bảo tính nhất quán xuyên suốt dự án.
+Việc sử dụng constants theo cấu trúc nhất quán giúp dự án dễ bảo trì, dễ đọc và dễ mở rộng. Luôn tuân thủ các quy tắc đặt tên và tổ chức để đảm bảo tính nhất quán xuyên suốt dự án. Sử dụng `index.ts` để đơn giản hóa imports và tăng tính linh hoạt trong việc sử dụng constants.
