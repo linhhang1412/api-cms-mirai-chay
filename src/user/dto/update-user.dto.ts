@@ -10,15 +10,12 @@ import {
 import { Role, Status } from 'generated/prisma';
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-import {
-  UserFieldDescriptions,
-  UserFieldExamples,
-} from '../constants/fields.constants';
+import { UserConstants } from '../constants/user.constants';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @ApiPropertyOptional({
-    description: UserFieldDescriptions.EMAIL,
-    example: UserFieldExamples.EMAIL,
+    description: UserConstants.FIELDS.DESCRIPTIONS.EMAIL,
+    example: UserConstants.FIELDS.EXAMPLES.EMAIL,
   })
   @IsEmail()
   @IsOptional()
@@ -26,8 +23,8 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   email?: string;
 
   @ApiPropertyOptional({
-    description: UserFieldDescriptions.FULL_NAME,
-    example: UserFieldExamples.FULL_NAME,
+    description: UserConstants.FIELDS.DESCRIPTIONS.FULL_NAME,
+    example: UserConstants.FIELDS.EXAMPLES.FULL_NAME,
   })
   @IsString()
   @IsOptional()
@@ -35,15 +32,15 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   fullName?: string;
 
   @ApiPropertyOptional({
-    description: UserFieldDescriptions.PHONE,
-    example: UserFieldExamples.PHONE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.PHONE,
+    example: UserConstants.FIELDS.EXAMPLES.PHONE,
   })
   @IsPhoneNumber('VN') // Vietnam phone number validation
   @IsOptional()
   phone?: string;
 
   @ApiPropertyOptional({
-    description: UserFieldDescriptions.ROLE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.ROLE,
     enum: Role,
     example: Role.MANAGER,
   })
@@ -52,7 +49,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   role?: Role;
 
   @ApiPropertyOptional({
-    description: UserFieldDescriptions.STATUS,
+    description: UserConstants.FIELDS.DESCRIPTIONS.STATUS,
     enum: Status,
     example: Status.INACTIVE,
   })

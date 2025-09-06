@@ -1,39 +1,36 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role, Status, User as PrismaUser } from 'generated/prisma';
-import {
-  UserFieldDescriptions,
-  UserFieldExamples,
-} from '../constants/fields.constants';
+import { UserConstants } from '../constants/user.constants';
 
 export class UserEntity implements PrismaUser {
   @ApiProperty({
-    example: UserFieldExamples.ID,
-    description: UserFieldDescriptions.ID,
+    example: UserConstants.FIELDS.EXAMPLES.ID,
+    description: UserConstants.FIELDS.DESCRIPTIONS.ID,
   })
   id: number;
 
   @ApiProperty({
-    example: UserFieldExamples.PUBLIC_ID,
-    description: UserFieldDescriptions.PUBLIC_ID,
+    example: UserConstants.FIELDS.EXAMPLES.PUBLIC_ID,
+    description: UserConstants.FIELDS.DESCRIPTIONS.PUBLIC_ID,
   })
   publicId: string;
 
   @ApiProperty({
-    example: UserFieldExamples.EMAIL,
-    description: UserFieldDescriptions.EMAIL,
+    example: UserConstants.FIELDS.EXAMPLES.EMAIL,
+    description: UserConstants.FIELDS.DESCRIPTIONS.EMAIL,
   })
   email: string;
 
   @ApiProperty({
-    example: UserFieldExamples.FULL_NAME,
-    description: UserFieldDescriptions.FULL_NAME,
+    example: UserConstants.FIELDS.EXAMPLES.FULL_NAME,
+    description: UserConstants.FIELDS.DESCRIPTIONS.FULL_NAME,
     nullable: true,
   })
   fullName: string | null;
 
   @ApiProperty({
-    example: UserFieldExamples.PHONE,
-    description: UserFieldDescriptions.PHONE,
+    example: UserConstants.FIELDS.EXAMPLES.PHONE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.PHONE,
     nullable: true,
   })
   phone: string | null;
@@ -41,13 +38,13 @@ export class UserEntity implements PrismaUser {
   @ApiProperty({
     enum: Role,
     example: Role.STAFF,
-    description: UserFieldDescriptions.ROLE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.ROLE,
   })
   role: Role;
 
   @ApiProperty({
-    example: UserFieldExamples.AVATAR,
-    description: UserFieldDescriptions.AVATAR,
+    example: UserConstants.FIELDS.EXAMPLES.AVATAR,
+    description: UserConstants.FIELDS.DESCRIPTIONS.AVATAR,
     nullable: true,
   })
   avatar: string | null;
@@ -55,40 +52,40 @@ export class UserEntity implements PrismaUser {
   @ApiProperty({
     enum: Status,
     example: Status.ACTIVE,
-    description: UserFieldDescriptions.STATUS,
+    description: UserConstants.FIELDS.DESCRIPTIONS.STATUS,
   })
   status: Status;
 
   @ApiProperty({
-    example: UserFieldExamples.DATE,
-    description: UserFieldDescriptions.LAST_LOGIN_AT,
+    example: UserConstants.FIELDS.EXAMPLES.DATE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.LAST_LOGIN_AT,
     nullable: true,
   })
   lastLoginAt: Date | null;
 
   @ApiProperty({
-    example: UserFieldExamples.DATE,
-    description: UserFieldDescriptions.LAST_OTP_SENT_AT,
+    example: UserConstants.FIELDS.EXAMPLES.DATE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.LAST_OTP_SENT_AT,
     nullable: true,
   })
   lastOtpSentAt: Date | null;
 
   @ApiProperty({
-    example: UserFieldExamples.DATE,
-    description: UserFieldDescriptions.FAILED_LOGIN_AT,
+    example: UserConstants.FIELDS.EXAMPLES.DATE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.FAILED_LOGIN_AT,
     nullable: true,
   })
   failedLoginAt: Date | null;
 
   @ApiProperty({
-    example: UserFieldExamples.DATE,
-    description: UserFieldDescriptions.CREATED_AT,
+    example: UserConstants.FIELDS.EXAMPLES.DATE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.CREATED_AT,
   })
   createdAt: Date;
 
   @ApiProperty({
-    example: UserFieldExamples.DATE,
-    description: UserFieldDescriptions.UPDATED_AT,
+    example: UserConstants.FIELDS.EXAMPLES.DATE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.UPDATED_AT,
   })
   updatedAt: Date;
 

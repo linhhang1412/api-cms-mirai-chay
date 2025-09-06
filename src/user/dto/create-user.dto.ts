@@ -8,23 +8,20 @@ import {
   IsPhoneNumber,
 } from 'class-validator';
 import { Role, Status } from 'generated/prisma';
-import {
-  UserFieldDescriptions,
-  UserFieldExamples,
-} from '../constants/fields.constants';
+import { UserConstants } from '../constants/user.constants';
 
 export class CreateUserDto {
   @ApiProperty({
-    description: UserFieldDescriptions.EMAIL,
-    example: UserFieldExamples.EMAIL,
+    description: UserConstants.FIELDS.DESCRIPTIONS.EMAIL,
+    example: UserConstants.FIELDS.EXAMPLES.EMAIL,
   })
   @IsEmail()
   @MaxLength(100)
   email: string;
 
   @ApiPropertyOptional({
-    description: UserFieldDescriptions.FULL_NAME,
-    example: UserFieldExamples.FULL_NAME,
+    description: UserConstants.FIELDS.DESCRIPTIONS.FULL_NAME,
+    example: UserConstants.FIELDS.EXAMPLES.FULL_NAME,
     required: false,
   })
   @IsString()
@@ -33,8 +30,8 @@ export class CreateUserDto {
   fullName?: string;
 
   @ApiPropertyOptional({
-    description: UserFieldDescriptions.PHONE,
-    example: UserFieldExamples.PHONE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.PHONE,
+    example: UserConstants.FIELDS.EXAMPLES.PHONE,
     required: false,
   })
   @IsPhoneNumber('VN') // Vietnam phone number validation
@@ -42,7 +39,7 @@ export class CreateUserDto {
   phone?: string;
 
   @ApiPropertyOptional({
-    description: UserFieldDescriptions.ROLE,
+    description: UserConstants.FIELDS.DESCRIPTIONS.ROLE,
     enum: Role,
     example: Role.STAFF,
     required: false,
@@ -52,7 +49,7 @@ export class CreateUserDto {
   role?: Role = Role.STAFF;
 
   @ApiPropertyOptional({
-    description: UserFieldDescriptions.STATUS,
+    description: UserConstants.FIELDS.DESCRIPTIONS.STATUS,
     enum: Status,
     example: Status.ACTIVE,
     required: false,

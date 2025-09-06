@@ -11,7 +11,7 @@ import { UserEntity } from './entities/user.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { Inject } from '@nestjs/common';
-import { UserErrorMessages, UserSuccessMessages } from './constants/messages.constants';
+import { UserMessages } from './constants/messages.constants';
 
 @Injectable()
 export class UserService {
@@ -26,7 +26,7 @@ export class UserService {
     try {
       this.logger.log(`Đang tạo người dùng với email: ${dto.email}`);
       const user = await this.userRepo.create(dto);
-      this.logger.log(`${UserSuccessMessages.USER_CREATED} với ID: ${user.id}`);
+      this.logger.log(`${UserMessages.SUCCESS.USER_CREATED} với ID: ${user.id}`);
 
       // Xóa cache cho danh sách tất cả người dùng
       await this.cacheManager.del('users:all');
@@ -34,10 +34,10 @@ export class UserService {
       return user;
     } catch (error) {
       this.logger.error(
-        `${UserErrorMessages.CREATE_USER_FAILED}: ${dto.email}`,
+        `${UserMessages.ERROR.CREATE_USER_FAILED}: ${dto.email}`,
         (error as Error).stack,
       );
-      throw new InternalServerErrorException(UserErrorMessages.CREATE_USER_FAILED);
+      throw new InternalServerErrorException(UserMessages.ERROR.CREATE_USER_FAILED);
     }
   }
 
@@ -62,13 +62,8 @@ export class UserService {
 
       return result;
     } catch (error) {
-      this.logger.error(
-        UserErrorMessages.FETCH_USERS_FAILED,
-        (error as Error).stack,
-      );
-      throw new InternalServerErrorException(
-        UserErrorMessages.FETCH_USERS_FAILED,
-      );
+      this.logger.error(UserMessages.ERROR.FETCH_USERS_FAILED, (error as Error).stack);
+      throw new InternalServerErrorException(UserMessages.ERROR.FETCH_USERS_FAILED);
     }
   }
 
@@ -86,7 +81,7 @@ export class UserService {
       
       const user = await this.userRepo.findById(id);
       if (!user) {
-        throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
+        throw new NotFoundException(UserMessages.ERROR.USER_NOT_FOUND);
       }
       
       // Cache người dùng
@@ -98,11 +93,11 @@ export class UserService {
         throw error;
       }
       this.logger.error(
-        `${UserErrorMessages.FETCH_USER_FAILED}: ${id}`,
+        `${UserMessages.ERROR.FETCH_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
-        UserErrorMessages.FETCH_USER_FAILED,
+        UserMessages.ERROR.FETCH_USER_FAILED,
       );
     }
   }
@@ -121,7 +116,7 @@ export class UserService {
 
       const user = await this.userRepo.findByEmail(email);
       if (!user) {
-        throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
+        throw new NotFoundException(UserMessages.ERROR.USER_NOT_FOUND);
       }
 
       // Cache người dùng
@@ -133,11 +128,11 @@ export class UserService {
         throw error;
       }
       this.logger.error(
-        `${UserErrorMessages.FETCH_USER_FAILED}: ${email}`,
+        `${UserMessages.ERROR.FETCH_USER_FAILED}: ${email}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
-        UserErrorMessages.FETCH_USER_FAILED,
+        UserMessages.ERROR.FETCH_USER_FAILED,
       );
     }
   }
@@ -145,11 +140,11 @@ export class UserService {
   async update(id: number, dto: UpdateUserDto): Promise<UserEntity> {
     try {
       this.logger.log(`Đang cập nhật người dùng với ID: ${id}`);
-
+      
       // Kiểm tra người dùng có tồn tại không
       const existingUser = await this.userRepo.findById(id);
       if (!existingUser) {
-        throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
+        throw new NotFoundException(UserMessages.ERROR.USER_NOT_FOUND);
       }
 
       const user = await this.userRepo.update(id, dto);
@@ -166,11 +161,11 @@ export class UserService {
         throw error;
       }
       this.logger.error(
-        `${UserErrorMessages.UPDATE_USER_FAILED}: ${id}`,
+        `${UserMessages.ERROR.UPDATE_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
-        UserErrorMessages.UPDATE_USER_FAILED,
+        UserMessages.ERROR.UPDATE_USER_FAILED,
       );
     }
   }
@@ -187,7 +182,7 @@ export class UserService {
       // Kiểm tra người dùng có tồn tại không
       const existingUser = await this.userRepo.findById(id);
       if (!existingUser) {
-        throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
+        throw new NotFoundException(UserMessages.ERROR.USER_NOT_FOUND);
       }
 
       if (hardDelete) {
@@ -197,8 +192,8 @@ export class UserService {
         await this.cacheManager.del(`user:email:${existingUser.email}`);
         await this.cacheManager.del('users:all');
 
-        this.logger.log(`${UserSuccessMessages.USER_DELETED} với ID: ${id}`);
-        return { message: UserSuccessMessages.USER_DELETED };
+        this.logger.log(`${UserMessages.SUCCESS.USER_DELETED} với ID: ${id}`);
+        return { message: UserMessages.SUCCESS.USER_DELETED };
       } else {
         const user = await this.userRepo.softDelete(id);
 
@@ -207,19 +202,19 @@ export class UserService {
         await this.cacheManager.del(`user:email:${user.email}`);
         await this.cacheManager.del('users:all');
 
-        this.logger.log(`${UserSuccessMessages.USER_DEACTIVATED} với ID: ${id}`);
-        return { message: UserSuccessMessages.USER_DEACTIVATED, user };
+        this.logger.log(`${UserMessages.SUCCESS.USER_DEACTIVATED} với ID: ${id}`);
+        return { message: UserMessages.SUCCESS.USER_DEACTIVATED, user };
       }
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
       this.logger.error(
-        `${UserErrorMessages.DELETE_USER_FAILED}: ${id}`,
+        `${UserMessages.ERROR.DELETE_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
-        UserErrorMessages.DELETE_USER_FAILED,
+        UserMessages.ERROR.DELETE_USER_FAILED,
       );
     }
   }

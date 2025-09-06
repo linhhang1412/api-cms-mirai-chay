@@ -11,7 +11,7 @@ import { randomUUID } from 'crypto';
 import { UserEntity } from './entities/user.entity';
 import { Status } from 'generated/prisma';
 import { Prisma } from 'generated/prisma';
-import { UserErrorMessages, UserSuccessMessages } from './constants/messages.constants';
+import { UserMessages } from './constants/messages.constants';
 
 @Injectable()
 export class UserRepository {
@@ -35,11 +35,11 @@ export class UserRepository {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Unique constraint violation
         if (error.code === 'P2002') {
-          throw new BadRequestException(UserErrorMessages.EMAIL_ALREADY_EXISTS);
+          throw new BadRequestException(UserMessages.ERROR.EMAIL_ALREADY_EXISTS);
         }
       }
-      this.logger.error(UserErrorMessages.CREATE_USER_FAILED, (error as Error).stack);
-      throw new InternalServerErrorException(UserErrorMessages.CREATE_USER_FAILED);
+      this.logger.error(UserMessages.ERROR.CREATE_USER_FAILED, (error as Error).stack);
+      throw new InternalServerErrorException(UserMessages.ERROR.CREATE_USER_FAILED);
     }
   }
 
@@ -60,19 +60,19 @@ export class UserRepository {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Record not found
         if (error.code === 'P2025') {
-          throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
+          throw new NotFoundException(UserMessages.ERROR.USER_NOT_FOUND);
         }
         // Unique constraint violation
         if (error.code === 'P2002') {
-          throw new BadRequestException(UserErrorMessages.EMAIL_ALREADY_EXISTS);
+          throw new BadRequestException(UserMessages.ERROR.EMAIL_ALREADY_EXISTS);
         }
       }
       this.logger.error(
-        `${UserErrorMessages.UPDATE_USER_FAILED}: ${id}`,
+        `${UserMessages.ERROR.UPDATE_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
-        UserErrorMessages.UPDATE_USER_FAILED,
+        UserMessages.ERROR.UPDATE_USER_FAILED,
       );
     }
   }
@@ -88,11 +88,11 @@ export class UserRepository {
       return user ? new UserEntity(user) : null;
     } catch (error) {
       this.logger.error(
-        `${UserErrorMessages.FETCH_USER_FAILED}: ${id}`,
+        `${UserMessages.ERROR.FETCH_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
-        UserErrorMessages.FETCH_USER_FAILED,
+        UserMessages.ERROR.FETCH_USER_FAILED,
       );
     }
   }
@@ -108,11 +108,11 @@ export class UserRepository {
       return user ? new UserEntity(user) : null;
     } catch (error) {
       this.logger.error(
-        `${UserErrorMessages.FETCH_USER_FAILED}: ${email}`,
+        `${UserMessages.ERROR.FETCH_USER_FAILED}: ${email}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
-        UserErrorMessages.FETCH_USER_FAILED,
+        UserMessages.ERROR.FETCH_USER_FAILED,
       );
     }
   }
@@ -128,11 +128,11 @@ export class UserRepository {
       return user ? new UserEntity(user) : null;
     } catch (error) {
       this.logger.error(
-        `${UserErrorMessages.FETCH_USER_FAILED}: ${publicId}`,
+        `${UserMessages.ERROR.FETCH_USER_FAILED}: ${publicId}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
-        UserErrorMessages.FETCH_USER_FAILED,
+        UserMessages.ERROR.FETCH_USER_FAILED,
       );
     }
   }
@@ -162,8 +162,8 @@ export class UserRepository {
         total,
       };
     } catch (error) {
-      this.logger.error(UserErrorMessages.FETCH_USERS_FAILED, (error as Error).stack);
-      throw new InternalServerErrorException(UserErrorMessages.FETCH_USERS_FAILED);
+      this.logger.error(UserMessages.ERROR.FETCH_USERS_FAILED, (error as Error).stack);
+      throw new InternalServerErrorException(UserMessages.ERROR.FETCH_USERS_FAILED);
     }
   }
 
@@ -184,15 +184,15 @@ export class UserRepository {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Record not found
         if (error.code === 'P2025') {
-          throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
+          throw new NotFoundException(UserMessages.ERROR.USER_NOT_FOUND);
         }
       }
       this.logger.error(
-        `${UserErrorMessages.DEACTIVATE_USER_FAILED}: ${id}`,
+        `${UserMessages.ERROR.DEACTIVATE_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
-        UserErrorMessages.DEACTIVATE_USER_FAILED,
+        UserMessages.ERROR.DEACTIVATE_USER_FAILED,
       );
     }
   }
@@ -204,15 +204,15 @@ export class UserRepository {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Record not found
         if (error.code === 'P2025') {
-          throw new NotFoundException(UserErrorMessages.USER_NOT_FOUND);
+          throw new NotFoundException(UserMessages.ERROR.USER_NOT_FOUND);
         }
       }
       this.logger.error(
-        `${UserErrorMessages.DELETE_USER_FAILED}: ${id}`,
+        `${UserMessages.ERROR.DELETE_USER_FAILED}: ${id}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
-        UserErrorMessages.DELETE_USER_FAILED,
+        UserMessages.ERROR.DELETE_USER_FAILED,
       );
     }
   }

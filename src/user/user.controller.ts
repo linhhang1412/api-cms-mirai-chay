@@ -27,15 +27,10 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { UserApiTags } from './constants/api.constants';
-import {
-  UserOperationSummaries,
-  UserOperationDescriptions,
-} from './constants/metadata.constants';
-import { UserResponseDescriptions } from './constants/responses.constants';
-import { UserParameterDescriptions } from './constants/parameters.constants';
+import { UserConstants } from './constants/user.constants';
+import { UserMetadata } from './constants/metadata.constants';
 
-@ApiTags(UserApiTags.USER)
+@ApiTags(UserMetadata.TAGS.USER)
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
@@ -44,26 +39,26 @@ export class UserController {
   @Post()
   @Roles(RoleNames.ADMIN, RoleNames.MANAGER)
   @ApiOperation({
-    summary: UserOperationSummaries.CREATE_USER,
-    description: UserOperationDescriptions.CREATE_USER,
+    summary: UserMetadata.OPERATION.SUMMARY.CREATE_USER,
+    description: UserMetadata.OPERATION.DESCRIPTION.CREATE_USER,
   })
   @ApiBearerAuth()
   @ApiResponse({
     status: 201,
-    description: UserResponseDescriptions.CREATE_USER_SUCCESS,
+    description: UserMetadata.RESPONSES.CREATE_USER_SUCCESS,
     type: UserEntity,
   })
   @ApiResponse({
     status: 400,
-    description: UserResponseDescriptions.INVALID_INPUT_DATA,
+    description: UserMetadata.RESPONSES.INVALID_INPUT_DATA,
   })
   @ApiResponse({
     status: 401,
-    description: UserResponseDescriptions.UNAUTHORIZED_ACCESS,
+    description: UserMetadata.RESPONSES.UNAUTHORIZED_ACCESS,
   })
   @ApiResponse({
     status: 403,
-    description: UserResponseDescriptions.FORBIDDEN_ACCESS,
+    description: UserMetadata.RESPONSES.FORBIDDEN_ACCESS,
   })
   @ApiBody({ type: CreateUserDto })
   async create(@Body() dto: CreateUserDto) {
@@ -73,13 +68,13 @@ export class UserController {
   @Get()
   @Roles(RoleNames.ADMIN, RoleNames.MANAGER)
   @ApiOperation({
-    summary: UserOperationSummaries.GET_ALL_USERS,
-    description: UserOperationDescriptions.GET_ALL_USERS,
+    summary: UserMetadata.OPERATION.SUMMARY.GET_ALL_USERS,
+    description: UserMetadata.OPERATION.DESCRIPTION.GET_ALL_USERS,
   })
   @ApiBearerAuth()
   @ApiResponse({
     status: 200,
-    description: UserResponseDescriptions.GET_ALL_USERS_SUCCESS,
+    description: UserMetadata.RESPONSES.GET_ALL_USERS_SUCCESS,
     schema: {
       type: 'object',
       properties: {
@@ -103,11 +98,11 @@ export class UserController {
   })
   @ApiResponse({
     status: 401,
-    description: UserResponseDescriptions.UNAUTHORIZED_ACCESS,
+    description: UserMetadata.RESPONSES.UNAUTHORIZED_ACCESS,
   })
   @ApiResponse({
     status: 403,
-    description: UserResponseDescriptions.FORBIDDEN_ACCESS,
+    description: UserMetadata.RESPONSES.FORBIDDEN_ACCESS,
   })
   @ApiQuery({
     name: 'page',
@@ -131,31 +126,31 @@ export class UserController {
   @Get(':id')
   @Roles(RoleNames.ADMIN, RoleNames.MANAGER, RoleNames.STAFF)
   @ApiOperation({
-    summary: UserOperationSummaries.GET_USER_BY_ID,
-    description: UserOperationDescriptions.GET_USER_BY_ID,
+    summary: UserMetadata.OPERATION.SUMMARY.GET_USER_BY_ID,
+    description: UserMetadata.OPERATION.DESCRIPTION.GET_USER_BY_ID,
   })
   @ApiBearerAuth()
   @ApiParam({
     name: 'id',
-    description: UserParameterDescriptions.USER_ID,
+    description: UserMetadata.PARAMETERS.USER_ID,
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: UserResponseDescriptions.GET_USER_BY_ID_SUCCESS,
+    description: UserMetadata.RESPONSES.GET_USER_BY_ID_SUCCESS,
     type: UserEntity,
   })
   @ApiResponse({
     status: 401,
-    description: UserResponseDescriptions.UNAUTHORIZED_ACCESS,
+    description: UserMetadata.RESPONSES.UNAUTHORIZED_ACCESS,
   })
   @ApiResponse({
     status: 403,
-    description: UserResponseDescriptions.FORBIDDEN_ACCESS,
+    description: UserMetadata.RESPONSES.FORBIDDEN_ACCESS,
   })
   @ApiResponse({
     status: 404,
-    description: UserResponseDescriptions.USER_NOT_FOUND,
+    description: UserMetadata.RESPONSES.USER_NOT_FOUND,
   })
   async findById(@Param('id') id: string) {
     const userId = parseInt(id, 10);
@@ -165,31 +160,31 @@ export class UserController {
   @Get('email/:email')
   @Roles(RoleNames.ADMIN, RoleNames.MANAGER)
   @ApiOperation({
-    summary: UserOperationSummaries.GET_USER_BY_EMAIL,
-    description: UserOperationDescriptions.GET_USER_BY_EMAIL,
+    summary: UserMetadata.OPERATION.SUMMARY.GET_USER_BY_EMAIL,
+    description: UserMetadata.OPERATION.DESCRIPTION.GET_USER_BY_EMAIL,
   })
   @ApiBearerAuth()
   @ApiParam({
     name: 'email',
-    description: UserParameterDescriptions.USER_EMAIL,
+    description: UserMetadata.PARAMETERS.USER_EMAIL,
     type: String,
   })
   @ApiResponse({
     status: 200,
-    description: UserResponseDescriptions.GET_USER_BY_EMAIL_SUCCESS,
+    description: UserMetadata.RESPONSES.GET_USER_BY_EMAIL_SUCCESS,
     type: UserEntity,
   })
   @ApiResponse({
     status: 401,
-    description: UserResponseDescriptions.UNAUTHORIZED_ACCESS,
+    description: UserMetadata.RESPONSES.UNAUTHORIZED_ACCESS,
   })
   @ApiResponse({
     status: 403,
-    description: UserResponseDescriptions.FORBIDDEN_ACCESS,
+    description: UserMetadata.RESPONSES.FORBIDDEN_ACCESS,
   })
   @ApiResponse({
     status: 404,
-    description: UserResponseDescriptions.USER_NOT_FOUND,
+    description: UserMetadata.RESPONSES.USER_NOT_FOUND,
   })
   async findByEmail(@Param('email') email: string) {
     return await this.userService.getByEmail(email);
@@ -198,36 +193,36 @@ export class UserController {
   @Put(':id')
   @Roles(RoleNames.ADMIN, RoleNames.MANAGER)
   @ApiOperation({
-    summary: UserOperationSummaries.UPDATE_USER,
-    description: UserOperationDescriptions.UPDATE_USER,
+    summary: UserMetadata.OPERATION.SUMMARY.UPDATE_USER,
+    description: UserMetadata.OPERATION.DESCRIPTION.UPDATE_USER,
   })
   @ApiBearerAuth()
   @ApiParam({
     name: 'id',
-    description: UserParameterDescriptions.USER_ID,
+    description: UserMetadata.PARAMETERS.USER_ID,
     type: Number,
   })
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({
     status: 200,
-    description: UserResponseDescriptions.UPDATE_USER_SUCCESS,
+    description: UserMetadata.RESPONSES.UPDATE_USER_SUCCESS,
     type: UserEntity,
   })
   @ApiResponse({
     status: 400,
-    description: UserResponseDescriptions.INVALID_INPUT_DATA,
+    description: UserMetadata.RESPONSES.INVALID_INPUT_DATA,
   })
   @ApiResponse({
     status: 401,
-    description: UserResponseDescriptions.UNAUTHORIZED_ACCESS,
+    description: UserMetadata.RESPONSES.UNAUTHORIZED_ACCESS,
   })
   @ApiResponse({
     status: 403,
-    description: UserResponseDescriptions.FORBIDDEN_ACCESS,
+    description: UserMetadata.RESPONSES.FORBIDDEN_ACCESS,
   })
   @ApiResponse({
     status: 404,
-    description: UserResponseDescriptions.USER_NOT_FOUND,
+    description: UserMetadata.RESPONSES.USER_NOT_FOUND,
   })
   async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     const userId = parseInt(id, 10);
@@ -237,36 +232,36 @@ export class UserController {
   @Delete(':id')
   @Roles(RoleNames.ADMIN)
   @ApiOperation({
-    summary: UserOperationSummaries.DELETE_USER,
-    description: UserOperationDescriptions.DELETE_USER,
+    summary: UserMetadata.OPERATION.SUMMARY.DELETE_USER,
+    description: UserMetadata.OPERATION.DESCRIPTION.DELETE_USER,
   })
   @ApiBearerAuth()
   @ApiParam({
     name: 'id',
-    description: UserParameterDescriptions.USER_ID,
+    description: UserMetadata.PARAMETERS.USER_ID,
     type: Number,
   })
   @ApiQuery({
     name: 'hard',
-    description: UserParameterDescriptions.HARD_DELETE,
+    description: UserMetadata.PARAMETERS.HARD_DELETE,
     required: false,
     type: Boolean,
   })
   @ApiResponse({
     status: 200,
-    description: UserResponseDescriptions.DELETE_USER_SUCCESS,
+    description: UserMetadata.RESPONSES.DELETE_USER_SUCCESS,
   })
   @ApiResponse({
     status: 401,
-    description: UserResponseDescriptions.UNAUTHORIZED_ACCESS,
+    description: UserMetadata.RESPONSES.UNAUTHORIZED_ACCESS,
   })
   @ApiResponse({
     status: 403,
-    description: UserResponseDescriptions.FORBIDDEN_ACCESS,
+    description: UserMetadata.RESPONSES.FORBIDDEN_ACCESS,
   })
   @ApiResponse({
     status: 404,
-    description: UserResponseDescriptions.USER_NOT_FOUND,
+    description: UserMetadata.RESPONSES.USER_NOT_FOUND,
   })
   async delete(@Param('id') id: string, @Query('hard') hardDelete: string) {
     const userId = parseInt(id, 10);
