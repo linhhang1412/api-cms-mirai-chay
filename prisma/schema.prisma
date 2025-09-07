@@ -407,3 +407,13 @@ model StockOutSnapshot {
   @@index([stockDate], map: "idx_stock_out_snapshot_date")
   @@map("stock_out_snapshot")
 }
+
+/// Cấu hình hệ thống (key-value)
+model SystemSetting {
+  key       String   @id @db.VarChar(64)
+  value     String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
