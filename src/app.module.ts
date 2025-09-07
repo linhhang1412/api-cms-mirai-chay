@@ -8,6 +8,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { IngredientModule } from './ingredient/ingredient.module';
 import { IngredientCategoryModule } from './ingredient-category/ingredient-category.module';
 import { IngredientUnitModule } from './ingredient-unit/ingredient-unit.module';
+import { StockInModule } from './stock-in/stock-in.module';
+import { StockOutModule } from './stock-out/stock-out.module';
+import { InventoryModule } from './inventory/inventory.module';
 
 @Module({
   imports: [
@@ -29,6 +32,9 @@ import { IngredientUnitModule } from './ingredient-unit/ingredient-unit.module';
     IngredientModule,
     IngredientCategoryModule,
     IngredientUnitModule,
+    StockInModule,
+    StockOutModule,
+    InventoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

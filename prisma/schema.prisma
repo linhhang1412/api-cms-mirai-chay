@@ -143,8 +143,267 @@ model Ingredient {
   createdAt     DateTime
   updatedAt     DateTime
 
+  // Back-relations for stock-in entries
+  stockInDailyItems     StockInDailyItem[]
+  stockInHistoryItems   StockInHistoryItem[]
+  stockInSnapshots      StockInSnapshot[]
+  stockOutDailyItems    StockOutDailyItem[]
+  stockOutHistoryItems  StockOutHistoryItem[]
+  stockOutSnapshots     StockOutSnapshot[]
+
   @@index([status], map: "idx_ingredient_status")
   @@index([name], map: "idx_ingredient_name")
   @@index([code, status], map: "idx_ingredient_code_status")
   @@map("ingredients")
+}
+
+/// Snapshot nhập theo ngày (per ingredient)
+model StockInSnapshot {
+  id             Int        @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId       String     @unique @db.Uuid
+  /// Ngày nghiệp vụ (date-only)
+  stockDate      DateTime   @db.Date
+  /// Nguyên liệu
+  ingredientId   Int
+  ingredient     Ingredient @relation(fields: [ingredientId], references: [id])
+  /// Tổng nhập trong ngày
+  quantityIn     Decimal    @db.Decimal(12, 3)
+  /// Thời gian tạo/cập nhật
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime?  @updatedAt
+
+  @@unique([stockDate, ingredientId], map: "uniq_stock_in_snapshot_date_ing")
+  @@index([ingredientId, stockDate], map: "idx_stock_in_snapshot_ing_date")
+  @@index([stockDate], map: "idx_stock_in_snapshot_date")
+  @@map("stock_in_snapshot")
+}
+
+/// Hành động ghi log lịch sử nhập
+// removed AuditAction per request
+
+/// Bảng phiếu nhập trong ngày (đơn giản, phục vụ tính tồn trong ngày)
+model StockInDaily {
+  id               Int        @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId         String     @unique @db.Uuid
+  /// Ngày nghiệp vụ (date-only)
+  stockDate        DateTime   @db.Date @default(dbgenerated("CURRENT_DATE"))
+  /// Ghi chú
+  note             String?    @db.VarChar(255)
+
+  /// Người tạo/sửa và thời gian
+  createdByUserId  Int
+  createdAt        DateTime   @default(now())
+  updatedByUserId  Int?
+  updatedAt        DateTime?  @updatedAt
+
+  items            StockInDailyItem[]
+  histories        StockInHistory[]
+
+  @@index([stockDate], map: "idx_stock_in_daily_date")
+  @@index([createdByUserId], map: "idx_stock_in_daily_created_by")
+  @@index([updatedByUserId], map: "idx_stock_in_daily_updated_by")
+  @@map("stock_in_daily")
+}
+
+/// Dòng chi tiết phiếu nhập trong ngày
+model StockInDailyItem {
+  id               Int           @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId         String        @unique @db.Uuid
+  dailyId          Int
+  daily            StockInDaily  @relation(fields: [dailyId], references: [id], onDelete: Cascade)
+  /// Lưu lại ngày nghiệp vụ để truy vấn/validate nhanh, đồng bộ với header
+  stockDate        DateTime      @db.Date
+  ingredientId     Int
+  ingredient       Ingredient    @relation(fields: [ingredientId], references: [id])
+  quantity         Decimal       @db.Decimal(12, 3)
+  note             String?       @db.VarChar(255)
+
+  createdByUserId  Int
+  createdAt        DateTime      @default(now())
+  updatedByUserId  Int?
+  updatedAt        DateTime?     @updatedAt
+
+  @@index([dailyId], map: "idx_stock_in_daily_item_daily")
+  @@index([stockDate, ingredientId], map: "idx_stock_in_daily_item_date_ing")
+  @@index([ingredientId], map: "idx_stock_in_daily_item_ingredient")
+  @@map("stock_in_daily_items")
+}
+
+/// Bảng lịch sử nhập (append-only, lưu delta khi tạo/sửa/xóa trong ngày)
+model StockInHistory {
+  id               BigInt      @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId         String      @unique @db.Uuid
+  /// Tham chiếu (nếu còn) tới bản ghi daily
+  dailyId          Int?
+  daily            StockInDaily? @relation(fields: [dailyId], references: [id], onDelete: SetNull)
+  /// Ngày nghiệp vụ (date-only)
+  stockDate        DateTime    @db.Date
+  /// Ghi chú phiếu (nếu cần)
+  note             String?     @db.VarChar(255)
+
+  /// Audit tối giản
+  createdByUserId  Int
+  createdAt        DateTime    @default(now())
+  updatedByUserId  Int?
+  updatedAt        DateTime?   @updatedAt
+
+  items            StockInHistoryItem[]
+
+  @@index([stockDate], map: "idx_stock_in_hist_date")
+  @@index([createdByUserId], map: "idx_stock_in_hist_created_by")
+  @@index([updatedByUserId], map: "idx_stock_in_hist_updated_by")
+  @@map("stock_in_history")
+}
+
+/// Dòng chi tiết lịch sử nhập (lưu bản cuối trong ngày)
+model StockInHistoryItem {
+  id               BigInt        @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId         String        @unique @db.Uuid
+  historyId        BigInt
+  history          StockInHistory @relation(fields: [historyId], references: [id], onDelete: Cascade)
+  /// Lưu lại ngày nghiệp vụ để tối ưu truy vấn/partitioning
+  stockDate        DateTime      @db.Date
+  ingredientId     Int
+  ingredient       Ingredient    @relation(fields: [ingredientId], references: [id])
+  quantity         Decimal       @db.Decimal(12, 3)
+  note             String?       @db.VarChar(255)
+
+  createdByUserId  Int
+  createdAt        DateTime      @default(now())
+  updatedByUserId  Int?
+  updatedAt        DateTime?     @updatedAt
+
+  @@index([historyId], map: "idx_stock_in_hist_item_hist")
+  @@index([stockDate, ingredientId], map: "idx_stock_in_hist_item_date_ing")
+  @@index([ingredientId], map: "idx_stock_in_hist_item_ing")
+  @@map("stock_in_history_items")
+}
+
+/// Bảng phiếu xuất trong ngày (header)
+model StockOutDaily {
+  id               Int        @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId         String     @unique @db.Uuid
+  /// Ngày nghiệp vụ (date-only)
+  stockDate        DateTime   @db.Date @default(dbgenerated("CURRENT_DATE"))
+  /// Ghi chú
+  note             String?    @db.VarChar(255)
+
+  /// Audit tối giản
+  createdByUserId  Int
+  createdAt        DateTime   @default(now())
+  updatedByUserId  Int?
+  updatedAt        DateTime?  @updatedAt
+
+  items            StockOutDailyItem[]
+  histories        StockOutHistory[]
+
+  @@index([stockDate], map: "idx_stock_out_daily_date")
+  @@index([createdByUserId], map: "idx_stock_out_daily_created_by")
+  @@index([updatedByUserId], map: "idx_stock_out_daily_updated_by")
+  @@map("stock_out_daily")
+}
+
+/// Dòng chi tiết phiếu xuất trong ngày
+model StockOutDailyItem {
+  id               Int           @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId         String        @unique @db.Uuid
+  dailyId          Int
+  daily            StockOutDaily @relation(fields: [dailyId], references: [id], onDelete: Cascade)
+  /// Lưu lại ngày nghiệp vụ để truy vấn/validate nhanh, đồng bộ với header
+  stockDate        DateTime      @db.Date
+  ingredientId     Int
+  ingredient       Ingredient    @relation(fields: [ingredientId], references: [id])
+  quantity         Decimal       @db.Decimal(12, 3)
+  note             String?       @db.VarChar(255)
+
+  createdByUserId  Int
+  createdAt        DateTime      @default(now())
+  updatedByUserId  Int?
+  updatedAt        DateTime?     @updatedAt
+
+  @@index([dailyId], map: "idx_stock_out_daily_item_daily")
+  @@index([stockDate, ingredientId], map: "idx_stock_out_daily_item_date_ing")
+  @@index([ingredientId], map: "idx_stock_out_daily_item_ingredient")
+  @@map("stock_out_daily_items")
+}
+
+/// Bảng lịch sử xuất (header)
+model StockOutHistory {
+  id               BigInt      @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId         String      @unique @db.Uuid
+  /// Tham chiếu (nếu còn) tới bản ghi daily
+  dailyId          Int?
+  daily            StockOutDaily? @relation(fields: [dailyId], references: [id], onDelete: SetNull)
+  /// Ngày nghiệp vụ (date-only)
+  stockDate        DateTime    @db.Date
+  /// Ghi chú phiếu (nếu cần)
+  note             String?     @db.VarChar(255)
+
+  /// Audit tối giản
+  createdByUserId  Int
+  createdAt        DateTime    @default(now())
+  updatedByUserId  Int?
+  updatedAt        DateTime?   @updatedAt
+
+  items            StockOutHistoryItem[]
+
+  @@index([stockDate], map: "idx_stock_out_hist_date")
+  @@index([createdByUserId], map: "idx_stock_out_hist_created_by")
+  @@index([updatedByUserId], map: "idx_stock_out_hist_updated_by")
+  @@map("stock_out_history")
+}
+
+/// Dòng chi tiết lịch sử xuất (lưu bản cuối trong ngày)
+model StockOutHistoryItem {
+  id               BigInt        @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId         String        @unique @db.Uuid
+  historyId        BigInt
+  history          StockOutHistory @relation(fields: [historyId], references: [id], onDelete: Cascade)
+  /// Lưu lại ngày nghiệp vụ để tối ưu truy vấn/partitioning
+  stockDate        DateTime      @db.Date
+  ingredientId     Int
+  ingredient       Ingredient    @relation(fields: [ingredientId], references: [id])
+  quantity         Decimal       @db.Decimal(12, 3)
+  note             String?       @db.VarChar(255)
+
+  createdByUserId  Int
+  createdAt        DateTime      @default(now())
+  updatedByUserId  Int?
+  updatedAt        DateTime?     @updatedAt
+
+  @@index([historyId], map: "idx_stock_out_hist_item_hist")
+  @@index([stockDate, ingredientId], map: "idx_stock_out_hist_item_date_ing")
+  @@index([ingredientId], map: "idx_stock_out_hist_item_ing")
+  @@map("stock_out_history_items")
+}
+
+/// Snapshot xuất theo ngày (per ingredient)
+model StockOutSnapshot {
+  id             Int        @id @default(autoincrement())
+  /// Định danh public (UUID)
+  publicId       String     @unique @db.Uuid
+  /// Ngày nghiệp vụ (date-only)
+  stockDate      DateTime   @db.Date
+  /// Nguyên liệu
+  ingredientId   Int
+  ingredient     Ingredient @relation(fields: [ingredientId], references: [id])
+  /// Tổng xuất trong ngày
+  quantityOut    Decimal    @db.Decimal(12, 3)
+  /// Thời gian tạo/cập nhật
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime?  @updatedAt
+
+  @@unique([stockDate, ingredientId], map: "uniq_stock_out_snapshot_date_ing")
+  @@index([ingredientId, stockDate], map: "idx_stock_out_snapshot_ing_date")
+  @@index([stockDate], map: "idx_stock_out_snapshot_date")
+  @@map("stock_out_snapshot")
 }
