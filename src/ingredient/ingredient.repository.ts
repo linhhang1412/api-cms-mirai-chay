@@ -29,6 +29,7 @@ export class IngredientRepository {
           categoryId: data.categoryId,
           unitId: (data as any).unitId,
           referencePrice: (data as any).referencePrice as any,
+          minStock: (data as any).minStock as any,
           status: data.status,
           publicId: randomUUID(),
           createdAt: now,
@@ -61,6 +62,7 @@ export class IngredientRepository {
           categoryId: data.categoryId,
           unitId: (data as any).unitId,
           referencePrice: (data as any).referencePrice as any,
+          minStock: (data as any).minStock as any,
           status: data.status,
           updatedAt: new Date(),
         },
@@ -259,6 +261,19 @@ export class IngredientRepository {
       throw new InternalServerErrorException(
         IngredientMessages.ERROR.DELETE_FAILED,
       );
+    }
+  }
+
+  async updateMinStock(id: number, minStock: number) {
+    try {
+      const rec = await this.prisma.ingredient.update({ where: { id }, data: { minStock: (minStock as any), updatedAt: new Date() } });
+      return new IngredientEntity(rec);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') throw new NotFoundException(IngredientMessages.ERROR.NOT_FOUND);
+      }
+      this.logger.error(`${IngredientMessages.ERROR.UPDATE_FAILED}: ${id}`, (error as Error).stack);
+      throw new InternalServerErrorException(IngredientMessages.ERROR.UPDATE_FAILED);
     }
   }
 }

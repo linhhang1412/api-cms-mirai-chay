@@ -9,12 +9,14 @@ import {
   Query,
   UseGuards,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IngredientService } from './ingredient.service';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
 import { IngredientEntity } from './entities/ingredient.entity';
+import { UpdateMinStockDto } from './dto/update-min-stock.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -119,5 +121,14 @@ export class IngredientController {
     const hard = hardDelete === 'true';
     return await this.ingredientService.delete(ingredientId, hard);
   }
-}
 
+  @Patch(':id/min-stock')
+  @Roles(RoleNames.ADMIN, RoleNames.MANAGER)
+  @ApiOperation({ summary: 'Cập nhật ngưỡng sắp hết (minStock) cho nguyên liệu' })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', type: Number })
+  async updateMinStock(@Param('id') id: string, @Body() dto: UpdateMinStockDto) {
+    const ingredientId = parseInt(id, 10);
+    return await this.ingredientService.updateMinStock(ingredientId, dto);
+  }
+}

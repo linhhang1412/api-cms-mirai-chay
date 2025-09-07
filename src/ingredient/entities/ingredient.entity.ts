@@ -42,6 +42,9 @@ export class IngredientEntity {
   })
   referencePrice?: any | null; // Prisma Decimal serialized
 
+  @ApiPropertyOptional({ description: 'Ngưỡng cảnh báo sắp hết (theo đơn vị cơ bản)' })
+  minStock?: any | null; // Prisma Decimal serialized
+
   @ApiProperty({ description: IngredientConstants.FIELDS.DESCRIPTIONS.STATUS, enum: Status })
   status: Status;
 

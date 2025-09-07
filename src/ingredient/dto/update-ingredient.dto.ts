@@ -51,6 +51,11 @@ export class UpdateIngredientDto extends PartialType(CreateIngredientDto) {
   @IsNumber()
   referencePrice?: number;
 
+  @ApiPropertyOptional({ description: 'Ngưỡng cảnh báo sắp hết (theo đơn vị cơ bản)' })
+  @IsOptional()
+  @IsNumber()
+  minStock?: number;
+
   @ApiPropertyOptional({
     description: IngredientConstants.FIELDS.DESCRIPTIONS.STATUS,
     enum: Status,

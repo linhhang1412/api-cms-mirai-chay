@@ -11,6 +11,7 @@ import { IngredientUnitModule } from './ingredient-unit/ingredient-unit.module';
 import { StockInModule } from './stock-in/stock-in.module';
 import { StockOutModule } from './stock-out/stock-out.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { ReportModule } from './report/report.module';
 import { JobsModule } from './jobs/jobs.module';
 
 @Module({
@@ -36,6 +37,7 @@ import { JobsModule } from './jobs/jobs.module';
     StockInModule,
     StockOutModule,
     InventoryModule,
+    ReportModule,
     JobsModule,
   ],
   controllers: [AppController],

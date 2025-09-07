@@ -3,6 +3,7 @@ import { IngredientRepository } from './ingredient.repository';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
 import { IngredientMessages } from './constants';
+import { UpdateMinStockDto } from './dto/update-min-stock.dto';
 
 @Injectable()
 export class IngredientService {
@@ -51,5 +52,9 @@ export class IngredientService {
       return { message: IngredientMessages.SUCCESS.DEACTIVATED, item };
     }
   }
-}
 
+  async updateMinStock(id: number, dto: UpdateMinStockDto) {
+    this.logger.log(`Cập nhật minStock cho nguyên liệu: ${id}`);
+    return await this.ingredientRepo.updateMinStock(id, dto.minStock);
+  }
+}

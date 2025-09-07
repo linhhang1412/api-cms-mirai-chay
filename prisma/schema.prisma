@@ -137,6 +137,8 @@ model Ingredient {
   unit          IngredientUnit? @relation(fields: [unitId], references: [id], onDelete: SetNull)
   /// Giá tham chiếu (VND)
   referencePrice Decimal?     @db.Decimal(12, 2)
+  /// Ngưỡng cảnh báo sắp hết (theo đơn vị cơ bản)
+  minStock       Decimal?     @db.Decimal(12, 3)
   /// Trạng thái hoạt động
   status        Status       @default(ACTIVE)
   /// Thời gian tạo/cập nhật
