@@ -123,6 +123,7 @@ export class IngredientRepository {
     page = 1,
     limit = 10,
     search?: string,
+    status?: Status,
   ): Promise<{ items: IngredientEntity[]; total: number }> {
     try {
       // If search term provided, use FTS + trigram with indexes
@@ -137,6 +138,7 @@ export class IngredientRepository {
           LEFT JOIN "ingredient_categories" c ON c."id" = i."categoryId"
           LEFT JOIN "ingredient_units" u ON u."id" = i."unitId"
           WHERE
+            ${status ? Prisma.sql`i."status" = ${status} AND` : Prisma.sql``}
             -- Ingredient FTS
             to_tsvector('simple', unaccent(coalesce(i."code", '') || ' ' || coalesce(i."name", '')))
               @@ plainto_tsquery('simple', unaccent(${q}))
@@ -179,6 +181,7 @@ export class IngredientRepository {
           LEFT JOIN "ingredient_categories" c ON c."id" = i."categoryId"
           LEFT JOIN "ingredient_units" u ON u."id" = i."unitId"
           WHERE
+            ${status ? Prisma.sql`i."status" = ${status} AND` : Prisma.sql``}
             to_tsvector('simple', unaccent(coalesce(i."code", '') || ' ' || coalesce(i."name", '')))
               @@ plainto_tsquery('simple', unaccent(${q}))
             OR i."name" % ${q}
@@ -202,13 +205,15 @@ export class IngredientRepository {
       }
 
       // No search: default Prisma query
+      const where: Prisma.IngredientWhereInput | undefined = status ? { status } : undefined;
       const [records, total] = await Promise.all([
         this.prisma.ingredient.findMany({
           skip: (page - 1) * limit,
           take: limit,
           orderBy: { createdAt: 'desc' },
+          where,
         }),
-        this.prisma.ingredient.count(),
+        this.prisma.ingredient.count({ where }),
       ]);
       return { items: records.map((r) => new IngredientEntity(r)), total };
     } catch (error) {

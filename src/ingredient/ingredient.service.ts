@@ -4,6 +4,7 @@ import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
 import { IngredientMessages } from './constants';
 import { UpdateMinStockDto } from './dto/update-min-stock.dto';
+import { Status } from 'generated/prisma';
 
 @Injectable()
 export class IngredientService {
@@ -16,9 +17,9 @@ export class IngredientService {
     return await this.ingredientRepo.create(dto);
   }
 
-  async getAll(page = 1, limit = 10, search?: string) {
+  async getAll(page = 1, limit = 10, search?: string, status?: Status) {
     this.logger.log('Lấy danh sách nguyên liệu');
-    const { items, total } = await this.ingredientRepo.list(page, limit, search);
+    const { items, total } = await this.ingredientRepo.list(page, limit, search, status);
     return { items, total, page, limit };
   }
 

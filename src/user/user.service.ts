@@ -1,13 +1,9 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
+import { Role, Status } from 'generated/prisma';
 import { UserMessages } from './constants';
 
 @Injectable()
@@ -39,12 +35,14 @@ export class UserService {
   async getAll(
     page: number = 1,
     limit: number = 10,
+    role?: Role,
+    status?: Status,
   ): Promise<{ users: UserEntity[]; total: number }> {
     try {
       this.logger.log(
         `Đang lấy danh sách người dùng - trang: ${page}, giới hạn: ${limit}`,
       );
-      const result = await this.userRepo.findAll(page, limit);
+      const result = await this.userRepo.findAll(page, limit, role, status);
       return result;
     } catch (error) {
       this.logger.error(

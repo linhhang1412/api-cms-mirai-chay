@@ -28,6 +28,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UserConstants, UserMetadata } from './constants';
+import { Role, Status } from 'generated/prisma';
 
 @ApiTags(UserMetadata.TAGS.USER)
 @Controller('users')
@@ -115,11 +116,15 @@ export class UserController {
     type: Number,
     description: 'Số mục mỗi trang (mặc định: 10)',
   })
+  @ApiQuery({ name: 'role', required: false, enum: Role })
+  @ApiQuery({ name: 'status', required: false, enum: Status })
   async findAll(
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('role') role?: Role,
+    @Query('status') status?: Status,
   ) {
-    return await this.userService.getAll(page || 1, limit || 10);
+    return await this.userService.getAll(page || 1, limit || 10, role, status);
   }
 
   @Get(':id')

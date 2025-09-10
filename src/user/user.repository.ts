@@ -9,7 +9,7 @@ import { PrismaService } from '../infra/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { randomUUID } from 'crypto';
 import { UserEntity } from './entities/user.entity';
-import { Status } from 'generated/prisma';
+import { Status, Role } from 'generated/prisma';
 import { Prisma } from 'generated/prisma';
 import { UserMessages } from './constants';
 
@@ -149,21 +149,24 @@ export class UserRepository {
   async findAll(
     page: number = 1,
     limit: number = 10,
+    role?: Role,
+    status?: Status,
   ): Promise<{ users: UserEntity[]; total: number }> {
     try {
       const skip = (page - 1) * limit;
+      const where: Prisma.UserWhereInput | undefined = {
+        ...(role ? { role } : {}),
+        ...(status ? { status } : {}),
+      };
       const [users, total] = await Promise.all([
         this.prisma.user.findMany({
           skip,
           take: limit,
-          orderBy: {
-            createdAt: 'desc',
-          },
-          include: {
-            emailOtps: true,
-          },
+          orderBy: { createdAt: 'desc' },
+          include: { emailOtps: true },
+          where,
         }),
-        this.prisma.user.count(),
+        this.prisma.user.count({ where }),
       ]);
 
       return {

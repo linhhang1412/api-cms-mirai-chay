@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -112,5 +112,14 @@ export class AuthController {
     // Trong hệ thống JWT stateless, logout thường chỉ trả về thông báo
     // Trong hệ thống production, có thể implement blacklist token
     return { message: AuthMessages.SUCCESS.USER_LOGGED_OUT_SUCCESSFULLY };
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: AuthMetadata.OPERATION.SUMMARY.USER_LOGOUT, description: 'Lấy thông tin người dùng hiện tại' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Thông tin người dùng' })
+  me(@Req() req: any) {
+    return this.authService.me(req.user?.email);
   }
 }

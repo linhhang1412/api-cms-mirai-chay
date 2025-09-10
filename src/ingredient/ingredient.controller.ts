@@ -12,6 +12,7 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Status } from 'generated/prisma';
 import { IngredientService } from './ingredient.service';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
@@ -55,6 +56,7 @@ export class IngredientController {
   @ApiQuery({ name: 'page', required: false, type: Number, description: IngredientMetadata.PARAMETERS.PAGE })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: IngredientMetadata.PARAMETERS.LIMIT })
   @ApiQuery({ name: 'search', required: false, type: String, description: IngredientMetadata.PARAMETERS.SEARCH })
+  @ApiQuery({ name: 'status', required: false, enum: Status })
   @ApiResponse({
     status: 200,
     description: IngredientMetadata.RESPONSES.LIST_SUCCESS,
@@ -72,8 +74,9 @@ export class IngredientController {
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('search') search?: string,
+    @Query('status') status?: Status,
   ) {
-    return await this.ingredientService.getAll(page || 1, limit || 10, search);
+    return await this.ingredientService.getAll(page || 1, limit || 10, search, status);
   }
 
   @Get(':id')

@@ -90,4 +90,10 @@ export class AuthService {
       throw new UnauthorizedException(AuthMessages.ERROR.TOKEN_REFRESH_INVALID);
     }
   }
+
+  async me(email: string) {
+    const user = await this.userRepo.findByEmail(email);
+    if (!user) throw new UnauthorizedException(AuthMessages.ERROR.USER_NOT_FOUND);
+    return user;
+  }
 }
