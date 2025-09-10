@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, Query, ParseIntPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/roles.decorator';
 import { RoleNames } from '../auth/constants/roles.constants';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -34,6 +34,34 @@ export class StockInController {
   @ApiParam({ name: 'publicId', type: String })
   getDaily(@Param('publicId') publicId: string) {
     return this.dailyService.get(publicId);
+  }
+
+  @Get('dailies/today')
+  @Roles(RoleNames.ADMIN, RoleNames.MANAGER, RoleNames.STAFF)
+  @ApiOperation({ summary: 'Danh sách phiếu nhập trong ngày' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  listToday(
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    return this.dailyService.listToday(page || 1, limit || 10);
+  }
+
+  @Get('dailies/history')
+  @Roles(RoleNames.ADMIN, RoleNames.MANAGER, RoleNames.STAFF)
+  @ApiOperation({ summary: 'Lịch sử phiếu nhập (ngoài hôm nay)' })
+  @ApiQuery({ name: 'from', required: false, type: String, description: 'YYYY-MM-DD' })
+  @ApiQuery({ name: 'to', required: false, type: String, description: 'YYYY-MM-DD' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  listHistory(
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    return this.dailyService.listHistory(from, to, page || 1, limit || 10);
   }
 
   @Post('dailies/:publicId/items')
@@ -71,4 +99,3 @@ export class StockInController {
     return this.itemService.remove(itemPublicId);
   }
 }
-

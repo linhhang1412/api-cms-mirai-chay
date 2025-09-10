@@ -44,6 +44,37 @@ export class StockInDailyService {
     return daily;
   }
 
+  async listToday(page = 1, limit = 10) {
+    const date = toDateOnly();
+    const skip = (page - 1) * limit;
+    const where = { stockDate: date as any } as any;
+    const [items, total] = await Promise.all([
+      this.prisma.stockInDaily.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' }, include: { _count: { select: { items: true } } } }),
+      this.prisma.stockInDaily.count({ where }),
+    ]);
+    return { items, total, page, limit };
+  }
+
+  async listHistory(fromStr?: string, toStr?: string, page = 1, limit = 10) {
+    const today = toDateOnly();
+    let from: Date;
+    let to: Date;
+    try {
+      from = fromStr ? toDateOnly(fromStr) : new Date(today.getFullYear(), today.getMonth(), today.getDate() - 30);
+      const defaultTo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+      to = toStr ? toDateOnly(toStr) : defaultTo;
+    } catch {
+      throw new BadRequestException('Invalid date range');
+    }
+    const skip = (page - 1) * limit;
+    const where = { stockDate: { gte: from as any, lte: to as any } } as any;
+    const [items, total] = await Promise.all([
+      this.prisma.stockInDaily.findMany({ where, skip, take: limit, orderBy: { stockDate: 'desc' }, include: { _count: { select: { items: true } } } }),
+      this.prisma.stockInDaily.count({ where }),
+    ]);
+    return { items, total, page, limit };
+  }
+
   async update(publicId: string, dto: UpdateStockInDailyDto) {
     const daily = await this.prisma.stockInDaily.findUnique({ where: { publicId } });
     if (!daily) throw new NotFoundException('StockInDaily not found');
@@ -62,4 +93,3 @@ export class StockInDailyService {
     return { success: true };
   }
 }
-
