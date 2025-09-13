@@ -15,9 +15,8 @@ export class IngredientCategoryService {
     return await this.repo.create(dto);
   }
 
-  async list(page = 1, limit = 10, search?: string) {
-    const { items, total } = await this.repo.list(page, limit, search);
-    return { items, total, page, limit };
+  async list() {
+    return await this.repo.list();
   }
 
   async getById(id: number) {

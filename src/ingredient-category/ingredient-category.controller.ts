@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IngredientCategoryService } from './ingredient-category.service';
 import { CreateIngredientCategoryDto } from './dto/create-ingredient-category.dto';
@@ -30,22 +30,9 @@ export class IngredientCategoryController {
   @Roles(RoleNames.ADMIN, RoleNames.MANAGER, RoleNames.STAFF)
   @ApiOperation({ summary: IngredientCategoryMetadata.OPERATION.SUMMARY.LIST, description: IngredientCategoryMetadata.OPERATION.DESCRIPTION.LIST })
   @ApiBearerAuth()
-  @ApiQuery({ name: 'page', required: false, type: Number, description: IngredientCategoryMetadata.PARAMETERS.PAGE })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: IngredientCategoryMetadata.PARAMETERS.LIMIT })
-  @ApiQuery({ name: 'search', required: false, type: String, description: IngredientCategoryMetadata.PARAMETERS.SEARCH })
-  @ApiResponse({ status: 200, description: IngredientCategoryMetadata.RESPONSES.LIST_SUCCESS, schema: { type: 'object', properties: { items: { type: 'array', items: { $ref: '#/components/schemas/IngredientCategoryEntity' } }, total: { type: 'number' }, page: { type: 'number' }, limit: { type: 'number' } } } })
-  async list(@Query('page', new ParseIntPipe({ optional: true })) page?: number, @Query('limit', new ParseIntPipe({ optional: true })) limit?: number, @Query('search') search?: string) {
-    return await this.service.list(page || 1, limit || 10, search);
-  }
-
-  @Get(':id')
-  @Roles(RoleNames.ADMIN, RoleNames.MANAGER, RoleNames.STAFF)
-  @ApiOperation({ summary: IngredientCategoryMetadata.OPERATION.SUMMARY.GET_BY_ID, description: IngredientCategoryMetadata.OPERATION.DESCRIPTION.GET_BY_ID })
-  @ApiBearerAuth()
-  @ApiParam({ name: 'id', description: IngredientCategoryMetadata.PARAMETERS.ID, type: Number })
-  @ApiResponse({ status: 200, description: IngredientCategoryMetadata.RESPONSES.GET_SUCCESS, type: IngredientCategoryEntity })
-  async getById(@Param('id') id: string) {
-    return await this.service.getById(parseInt(id, 10));
+  @ApiResponse({ status: 200, description: IngredientCategoryMetadata.RESPONSES.LIST_SUCCESS, type: IngredientCategoryEntity, isArray: true })
+  async list() {
+    return await this.service.list();
   }
 
   @Put(':id')
