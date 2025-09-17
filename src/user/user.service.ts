@@ -32,18 +32,13 @@ export class UserService {
     }
   }
 
-  async getAll(
-    page: number = 1,
-    limit: number = 10,
-    role?: Role,
-    status?: Status,
-  ): Promise<{ users: UserEntity[]; total: number }> {
+  async getAll(): Promise<UserEntity[]> {
     try {
       this.logger.log(
-        `Đang lấy danh sách người dùng - trang: ${page}, giới hạn: ${limit}`,
+        `Đang lấy danh sách tất cả người dùng`,
       );
-      const result = await this.userRepo.findAll(page, limit, role, status);
-      return result;
+      const result = await this.userRepo.findAll();
+      return result.users;
     } catch (error) {
       this.logger.error(
         UserMessages.ERROR.FETCH_USERS_FAILED,

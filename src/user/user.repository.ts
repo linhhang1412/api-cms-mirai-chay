@@ -146,32 +146,15 @@ export class UserRepository {
     }
   }
 
-  async findAll(
-    page: number = 1,
-    limit: number = 10,
-    role?: Role,
-    status?: Status,
-  ): Promise<{ users: UserEntity[]; total: number }> {
+  async findAll(): Promise<{ users: UserEntity[] }> {
     try {
-      const skip = (page - 1) * limit;
-      const where: Prisma.UserWhereInput | undefined = {
-        ...(role ? { role } : {}),
-        ...(status ? { status } : {}),
-      };
-      const [users, total] = await Promise.all([
-        this.prisma.user.findMany({
-          skip,
-          take: limit,
-          orderBy: { createdAt: 'desc' },
-          include: { emailOtps: true },
-          where,
-        }),
-        this.prisma.user.count({ where }),
-      ]);
+      const users = await this.prisma.user.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: { emailOtps: true },
+      });
 
       return {
         users: users.map((u) => new UserEntity(u)),
-        total,
       };
     } catch (error) {
       this.logger.error(

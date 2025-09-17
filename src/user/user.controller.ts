@@ -75,26 +75,8 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: UserMetadata.RESPONSES.GET_ALL_USERS_SUCCESS,
-    schema: {
-      type: 'object',
-      properties: {
-        users: {
-          type: 'array',
-          items: {
-            $ref: '#/components/schemas/UserEntity',
-          },
-        },
-        total: {
-          type: 'number',
-        },
-        page: {
-          type: 'number',
-        },
-        limit: {
-          type: 'number',
-        },
-      },
-    },
+    type: UserEntity,
+    isArray: true,
   })
   @ApiResponse({
     status: 401,
@@ -104,27 +86,8 @@ export class UserController {
     status: 403,
     description: UserMetadata.RESPONSES.FORBIDDEN_ACCESS,
   })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Số trang (mặc định: 1)',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Số mục mỗi trang (mặc định: 10)',
-  })
-  @ApiQuery({ name: 'role', required: false, enum: Role })
-  @ApiQuery({ name: 'status', required: false, enum: Status })
-  async findAll(
-    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
-    @Query('role') role?: Role,
-    @Query('status') status?: Status,
-  ) {
-    return await this.userService.getAll(page || 1, limit || 10, role, status);
+  async findAll() {
+    return await this.userService.getAll();
   }
 
   @Get(':id')
