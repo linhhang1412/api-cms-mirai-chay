@@ -53,30 +53,14 @@ export class IngredientController {
     description: IngredientMetadata.OPERATION.DESCRIPTION.LIST,
   })
   @ApiBearerAuth()
-  @ApiQuery({ name: 'page', required: false, type: Number, description: IngredientMetadata.PARAMETERS.PAGE })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: IngredientMetadata.PARAMETERS.LIMIT })
-  @ApiQuery({ name: 'search', required: false, type: String, description: IngredientMetadata.PARAMETERS.SEARCH })
-  @ApiQuery({ name: 'status', required: false, enum: Status })
   @ApiResponse({
     status: 200,
     description: IngredientMetadata.RESPONSES.LIST_SUCCESS,
-    schema: {
-      type: 'object',
-      properties: {
-        items: { type: 'array', items: { $ref: '#/components/schemas/IngredientEntity' } },
-        total: { type: 'number' },
-        page: { type: 'number' },
-        limit: { type: 'number' },
-      },
-    },
+    type: IngredientEntity,
+    isArray: true,
   })
-  async list(
-    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
-    @Query('search') search?: string,
-    @Query('status') status?: Status,
-  ) {
-    return await this.ingredientService.getAll(page || 1, limit || 10, search, status);
+  async list() {
+    return await this.ingredientService.getAll();
   }
 
   @Get(':id')

@@ -119,103 +119,12 @@ export class IngredientRepository {
     }
   }
 
-  async list(
-    page = 1,
-    limit = 10,
-    search?: string,
-    status?: Status,
-  ): Promise<{ items: IngredientEntity[]; total: number }> {
+  async list(): Promise<{ items: IngredientEntity[] }> {
     try {
-      // If search term provided, use FTS + trigram with indexes
-      if (search && search.trim().length > 0) {
-        const q = search.trim();
-        const offset = (page - 1) * limit;
-
-        // Items query using FTS + trigram across ingredient + category + unit
-        const items = (await this.prisma.$queryRaw<any[]>`
-          SELECT i.*
-          FROM "ingredients" i
-          LEFT JOIN "ingredient_categories" c ON c."id" = i."categoryId"
-          LEFT JOIN "ingredient_units" u ON u."id" = i."unitId"
-          WHERE
-            ${status ? Prisma.sql`i."status" = ${status} AND` : Prisma.sql``}
-            -- Ingredient FTS
-            to_tsvector('simple', unaccent(coalesce(i."code", '') || ' ' || coalesce(i."name", '')))
-              @@ plainto_tsquery('simple', unaccent(${q}))
-            OR i."name" % ${q}
-            OR i."code" % ${q}
-            -- Category FTS & trigram
-            OR (c."id" IS NOT NULL AND (
-              to_tsvector('simple', unaccent(coalesce(c."code", '') || ' ' || coalesce(c."name", '')))
-                @@ plainto_tsquery('simple', unaccent(${q}))
-              OR c."name" % ${q}
-              OR c."code" % ${q}
-            ))
-            -- Unit FTS & trigram
-            OR (u."id" IS NOT NULL AND (
-              to_tsvector('simple', unaccent(coalesce(u."code", '') || ' ' || coalesce(u."name", '')))
-                @@ plainto_tsquery('simple', unaccent(${q}))
-              OR u."name" % ${q}
-              OR u."code" % ${q}
-            ))
-          ORDER BY
-            GREATEST(
-              ts_rank_cd(
-                to_tsvector('simple', unaccent(coalesce(i."code", '') || ' ' || coalesce(i."name", ''))),
-                plainto_tsquery('simple', unaccent(${q}))
-              ),
-              COALESCE(similarity(i."name", ${q}), 0),
-              COALESCE(similarity(i."code", ${q}), 0),
-              COALESCE(similarity(c."name", ${q}), 0),
-              COALESCE(similarity(c."code", ${q}), 0),
-              COALESCE(similarity(u."name", ${q}), 0),
-              COALESCE(similarity(u."code", ${q}), 0)
-            ) DESC,
-            i."createdAt" DESC
-          LIMIT ${limit} OFFSET ${offset}
-        `) as any[];
-
-        const countRows = (await this.prisma.$queryRaw<any[]>`
-          SELECT COUNT(*)::int AS cnt
-          FROM "ingredients" i
-          LEFT JOIN "ingredient_categories" c ON c."id" = i."categoryId"
-          LEFT JOIN "ingredient_units" u ON u."id" = i."unitId"
-          WHERE
-            ${status ? Prisma.sql`i."status" = ${status} AND` : Prisma.sql``}
-            to_tsvector('simple', unaccent(coalesce(i."code", '') || ' ' || coalesce(i."name", '')))
-              @@ plainto_tsquery('simple', unaccent(${q}))
-            OR i."name" % ${q}
-            OR i."code" % ${q}
-            OR (c."id" IS NOT NULL AND (
-              to_tsvector('simple', unaccent(coalesce(c."code", '') || ' ' || coalesce(c."name", '')))
-                @@ plainto_tsquery('simple', unaccent(${q}))
-              OR c."name" % ${q}
-              OR c."code" % ${q}
-            ))
-            OR (u."id" IS NOT NULL AND (
-              to_tsvector('simple', unaccent(coalesce(u."code", '') || ' ' || coalesce(u."name", '')))
-                @@ plainto_tsquery('simple', unaccent(${q}))
-              OR u."name" % ${q}
-              OR u."code" % ${q}
-            ))
-        `) as Array<{ cnt: number } | { cnt: string }>;
-
-        const total = parseInt((countRows?.[0] as any)?.cnt ?? '0', 10);
-        return { items: items.map((r) => new IngredientEntity(r)), total };
-      }
-
-      // No search: default Prisma query
-      const where: Prisma.IngredientWhereInput | undefined = status ? { status } : undefined;
-      const [records, total] = await Promise.all([
-        this.prisma.ingredient.findMany({
-          skip: (page - 1) * limit,
-          take: limit,
-          orderBy: { createdAt: 'desc' },
-          where,
-        }),
-        this.prisma.ingredient.count({ where }),
-      ]);
-      return { items: records.map((r) => new IngredientEntity(r)), total };
+      const records = await this.prisma.ingredient.findMany({ 
+        orderBy: { createdAt: 'desc' } 
+      });
+      return { items: records.map((r) => new IngredientEntity(r)) };
     } catch (error) {
       this.logger.error(
         IngredientMessages.ERROR.FETCH_LIST_FAILED,

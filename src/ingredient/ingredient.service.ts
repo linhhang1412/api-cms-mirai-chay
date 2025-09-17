@@ -17,10 +17,10 @@ export class IngredientService {
     return await this.ingredientRepo.create(dto);
   }
 
-  async getAll(page = 1, limit = 10, search?: string, status?: Status) {
+  async getAll() {
     this.logger.log('Lấy danh sách nguyên liệu');
-    const { items, total } = await this.ingredientRepo.list(page, limit, search, status);
-    return { items, total, page, limit };
+    const { items } = await this.ingredientRepo.list();
+    return items;
   }
 
   async getById(id: number) {

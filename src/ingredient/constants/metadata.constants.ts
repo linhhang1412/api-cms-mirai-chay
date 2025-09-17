@@ -10,7 +10,7 @@ export const IngredientMetadata = {
     },
     DESCRIPTION: {
       CREATE: 'Tạo một nguyên liệu mới để cấu hình nhập/xuất sau này',
-      LIST: 'Trả về danh sách nguyên liệu có phân trang',
+      LIST: 'Trả về danh sách tất cả nguyên liệu',
       GET_BY_ID: 'Trả về thông tin chi tiết của một nguyên liệu',
       UPDATE: 'Cập nhật thông tin của nguyên liệu',
       DELETE:
@@ -23,9 +23,6 @@ export const IngredientMetadata = {
   PARAMETERS: {
     ID: 'ID của nguyên liệu',
     HARD_DELETE: 'Thực hiện xóa vĩnh viễn',
-    PAGE: 'Trang (mặc định: 1)',
-    LIMIT: 'Số mục mỗi trang (mặc định: 10)',
-    SEARCH: 'Từ khóa tìm kiếm theo mã/tên',
   },
   RESPONSES: {
     CREATE_SUCCESS: 'Tạo nguyên liệu thành công',
