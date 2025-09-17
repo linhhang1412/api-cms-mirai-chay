@@ -9,7 +9,7 @@ export const IngredientUnitMetadata = {
     },
     DESCRIPTION: {
       CREATE: 'Tạo một đơn vị mới',
-      LIST: 'Lấy danh sách đơn vị có phân trang và tìm kiếm',
+      LIST: 'Lấy danh sách tất cả đơn vị',
       GET_BY_ID: 'Lấy chi tiết đơn vị theo ID',
       UPDATE: 'Cập nhật đơn vị theo ID',
       DELETE: 'Xóa mềm hoặc xóa vĩnh viễn đơn vị',
@@ -18,9 +18,6 @@ export const IngredientUnitMetadata = {
   TAGS: { UNIT: 'Đơn vị nguyên liệu' },
   PARAMETERS: {
     ID: 'ID đơn vị',
-    PAGE: 'Trang (mặc định: 1)',
-    LIMIT: 'Số mục mỗi trang (mặc định: 10)',
-    SEARCH: 'Từ khóa (code/name)',
     HARD_DELETE: 'Xóa vĩnh viễn',
   },
   RESPONSES: {

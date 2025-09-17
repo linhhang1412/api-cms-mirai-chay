@@ -30,12 +30,9 @@ export class IngredientUnitController {
   @Roles(RoleNames.ADMIN, RoleNames.MANAGER, RoleNames.STAFF)
   @ApiOperation({ summary: IngredientUnitMetadata.OPERATION.SUMMARY.LIST, description: IngredientUnitMetadata.OPERATION.DESCRIPTION.LIST })
   @ApiBearerAuth()
-  @ApiQuery({ name: 'page', required: false, type: Number, description: IngredientUnitMetadata.PARAMETERS.PAGE })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: IngredientUnitMetadata.PARAMETERS.LIMIT })
-  @ApiQuery({ name: 'search', required: false, type: String, description: IngredientUnitMetadata.PARAMETERS.SEARCH })
-  @ApiResponse({ status: 200, description: IngredientUnitMetadata.RESPONSES.LIST_SUCCESS, schema: { type: 'object', properties: { items: { type: 'array', items: { $ref: '#/components/schemas/IngredientUnitEntity' } }, total: { type: 'number' }, page: { type: 'number' }, limit: { type: 'number' } } } })
-  async list(@Query('page', new ParseIntPipe({ optional: true })) page?: number, @Query('limit', new ParseIntPipe({ optional: true })) limit?: number, @Query('search') search?: string) {
-    return await this.service.list(page || 1, limit || 10, search);
+  @ApiResponse({ status: 200, description: IngredientUnitMetadata.RESPONSES.LIST_SUCCESS, type: IngredientUnitEntity, isArray: true })
+  async list() {
+    return await this.service.list();
   }
 
   @Get(':id')

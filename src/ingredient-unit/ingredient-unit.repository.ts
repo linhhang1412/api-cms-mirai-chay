@@ -49,42 +49,12 @@ export class IngredientUnitRepository {
     }
   }
 
-  async list(page = 1, limit = 10, search?: string) {
+  async list() {
     try {
-      if (search && search.trim()) {
-        const q = search.trim();
-        const offset = (page - 1) * limit;
-        const items = (await this.prisma.$queryRaw<any[]>`
-          SELECT u.*
-          FROM "ingredient_units" u
-          WHERE to_tsvector('simple', unaccent(coalesce(u."code", '') || ' ' || coalesce(u."name", '')))
-                  @@ plainto_tsquery('simple', unaccent(${q}))
-             OR u."name" % ${q}
-             OR u."code" % ${q}
-          ORDER BY GREATEST(
-                   ts_rank_cd(to_tsvector('simple', unaccent(coalesce(u."code", '') || ' ' || coalesce(u."name", ''))),
-                              plainto_tsquery('simple', unaccent(${q}))),
-                   similarity(u."name", ${q}),
-                   similarity(u."code", ${q})
-                 ) DESC, u."createdAt" DESC
-          LIMIT ${limit} OFFSET ${offset}
-        `) as any[];
-        const countRows = (await this.prisma.$queryRaw<any[]>`
-          SELECT COUNT(*)::int AS cnt
-          FROM "ingredient_units" u
-          WHERE to_tsvector('simple', unaccent(coalesce(u."code", '') || ' ' || coalesce(u."name", '')))
-                  @@ plainto_tsquery('simple', unaccent(${q}))
-             OR u."name" % ${q}
-             OR u."code" % ${q}
-        `) as Array<{ cnt: number } | { cnt: string }>;
-        const total = parseInt((countRows?.[0] as any)?.cnt ?? '0', 10);
-        return { items: items.map((r) => new IngredientUnitEntity(r)), total };
-      }
-      const [records, total] = await Promise.all([
-        this.prisma.ingredientUnit.findMany({ skip: (page - 1) * limit, take: limit, orderBy: { createdAt: 'desc' } }),
-        this.prisma.ingredientUnit.count(),
-      ]);
-      return { items: records.map((r) => new IngredientUnitEntity(r)), total };
+      const records = await this.prisma.ingredientUnit.findMany({ 
+        orderBy: { createdAt: 'desc' } 
+      });
+      return { items: records.map((r) => new IngredientUnitEntity(r)) };
     } catch (error) {
       this.logger.error(IngredientUnitMessages.ERROR.FETCH_LIST_FAILED, (error as Error).stack);
       throw new InternalServerErrorException(IngredientUnitMessages.ERROR.FETCH_LIST_FAILED);
