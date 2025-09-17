@@ -39,13 +39,8 @@ export class StockInController {
   @Get('dailies/today')
   @Roles(RoleNames.ADMIN, RoleNames.MANAGER, RoleNames.STAFF)
   @ApiOperation({ summary: 'Danh sách phiếu nhập trong ngày' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  listToday(
-    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
-  ) {
-    return this.dailyService.listToday(page || 1, limit || 10);
+  listToday() {
+    return this.dailyService.listToday();
   }
 
   @Get('dailies/history')
@@ -53,15 +48,11 @@ export class StockInController {
   @ApiOperation({ summary: 'Lịch sử phiếu nhập (ngoài hôm nay)' })
   @ApiQuery({ name: 'from', required: false, type: String, description: 'YYYY-MM-DD' })
   @ApiQuery({ name: 'to', required: false, type: String, description: 'YYYY-MM-DD' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
   listHistory(
     @Query('from') from?: string,
     @Query('to') to?: string,
-    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
-    return this.dailyService.listHistory(from, to, page || 1, limit || 10);
+    return this.dailyService.listHistory(from, to);
   }
 
   @Post('dailies/:publicId/items')
