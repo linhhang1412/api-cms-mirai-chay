@@ -1,13 +1,11 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
+import { AddStockInItemDto } from './add-item.dto';
 
 export class CreateStockInDailyDto {
-  @ApiPropertyOptional({ description: 'Ngày nghiệp vụ (YYYY-MM-DD)', type: String })
-  stockDate?: string;
-
-  @ApiPropertyOptional({ description: 'Ghi chú', type: String })
+  @ApiProperty({ description: 'Danh sách items', type: () => [AddStockInItemDto] })
+  items!: AddStockInItemDto[];
+  
+  @ApiProperty({ description: 'Ghi chú', type: String, required: false })
   note?: string;
-
-  @ApiPropertyOptional({ description: 'ID người tạo (tối giản, lấy từ body)', type: Number })
-  createdByUserId?: number;
 }
 

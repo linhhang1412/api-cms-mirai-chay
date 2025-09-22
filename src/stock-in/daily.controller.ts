@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, Query, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, Query, ParseIntPipe, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/roles.decorator';
 import { RoleNames } from '../auth/constants/roles.constants';
@@ -18,13 +18,15 @@ import { StockInItemService } from './services/item.service';
 export class StockInController {
   constructor(
     private readonly dailyService: StockInDailyService,
+    private readonly itemService: StockInItemService,
   ) { }
 
   @Post('dailies')
   @Roles(RoleNames.ADMIN, RoleNames.MANAGER, RoleNames.STAFF)
   @ApiOperation({ summary: 'Tạo phiếu nhập trong ngày (header)' })
-  createDaily(@Body() dto: CreateStockInDailyDto) {
-    return this.dailyService.create(dto);
+  createDaily(@Body() dto: CreateStockInDailyDto, @Request() req) {
+    const currentUserId = req.user?.id || 0;
+    return this.dailyService.create(dto, currentUserId);
   }
 
   @Get('dailies/:id')

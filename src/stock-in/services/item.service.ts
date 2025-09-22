@@ -17,7 +17,7 @@ function isToday(date: Date): boolean {
 export class StockInItemService {
   constructor(private readonly prisma: PrismaService) { }
 
-  async add(dailyPublicId: string, dto: AddStockInItemDto) {
+  async add(dailyPublicId: string, dto: AddStockInItemDto, currentUserId: number) {
     const daily = await this.prisma.stockInDaily.findUnique({ where: { publicId: dailyPublicId } });
     if (!daily) throw new NotFoundException('StockInDaily not found');
     if (!isToday(daily.stockDate as unknown as Date)) throw new BadRequestException('Chỉ được thêm/sửa/xóa trong ngày');
@@ -32,7 +32,7 @@ export class StockInItemService {
         ingredientId: ingredient.id,
         quantity: (dto.quantity as any),
         note: dto.note,
-        createdByUserId: dto.createdByUserId,
+        createdByUserId: currentUserId,
         createdAt: new Date(),
       },
     });

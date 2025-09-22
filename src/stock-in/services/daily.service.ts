@@ -3,6 +3,9 @@ import { PrismaService } from '../../infra/prisma/prisma.service';
 import { randomUUID } from 'crypto';
 import { CreateStockInDailyDto } from '../dto/create-daily.dto';
 import { UpdateStockInDailyDto } from '../dto/update-daily.dto';
+import { StockInDailyItem } from 'generated/prisma';
+
+
 
 function toDateOnly(dateStr?: string): Date {
   if (!dateStr) return new Date();
@@ -24,17 +27,60 @@ function isToday(date: Date): boolean {
 export class StockInDailyService {
   constructor(private readonly prisma: PrismaService) { }
 
-  async create(dto: CreateStockInDailyDto) {
-    const date = toDateOnly(dto.stockDate);
-    const createdByUserId = dto.createdByUserId ?? 0;
-    return await this.prisma.stockInDaily.create({
-      data: {
-        publicId: randomUUID(),
-        stockDate: date as any,
-        note: dto.note,
-        createdByUserId,
-        createdAt: new Date(),
-      },
+  async create(dto: CreateStockInDailyDto, currentUserId: number) {
+    // Kiểm tra nếu không có items thì báo lỗi
+    if (!dto.items || dto.items.length === 0) {
+      throw new BadRequestException('Phải có ít nhất một item trong phiếu nhập');
+    }
+
+    const date = toDateOnly();
+    const createdByUserId = currentUserId;
+
+    // Sử dụng transaction để đảm bảo tính toàn vẹn dữ liệu
+    return await this.prisma.$transaction(async (prisma) => {
+      // Tạo phiếu nhập
+      const daily = await prisma.stockInDaily.create({
+        data: {
+          publicId: randomUUID(),
+          stockDate: date as any,
+          note: dto.note,
+          createdByUserId,
+          createdAt: new Date(),
+        },
+      });
+
+      // Tạo các items
+      const createdItems: StockInDailyItem[] = [];
+      for (const itemDto of dto.items) {
+        const ingredient = await prisma.ingredient.findUnique({
+          where: { publicId: itemDto.ingredientPublicId }
+        });
+
+        if (!ingredient) {
+          throw new NotFoundException(`Ingredient with publicId ${itemDto.ingredientPublicId} not found`);
+        }
+
+        const item = await prisma.stockInDailyItem.create({
+          data: {
+            publicId: randomUUID(),
+            dailyId: daily.id,
+            stockDate: date as any,
+            ingredientId: ingredient.id,
+            quantity: itemDto.quantity as any,
+            note: itemDto.note,
+            createdByUserId,
+            createdAt: new Date(),
+          },
+        });
+
+        createdItems.push(item);
+      }
+
+      // Trả về thông tin phiếu nhập cùng với các items
+      return {
+        ...daily,
+        items: createdItems
+      };
     });
   }
 
