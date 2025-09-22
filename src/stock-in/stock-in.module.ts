@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { StockInController } from './stock-in.controller';
+import { StockInController } from './history.controller';
 import { StockInDailyService } from './services/daily.service';
 import { StockInItemService } from './services/item.service';
 import { StockInCloseDayService } from './services/close-day.service';
